@@ -25,6 +25,7 @@ import {
   getAllArticles,
   createArticle,
   addTagsToArticle,
+  searchArticles,
 } from "@/lib/articles";
 import { createTagsIfNotExist } from "@/lib/tags";
 
@@ -84,13 +85,13 @@ async function handleGetArticles(req: NextRequest) {
     result = await getAllArticles(page, limit);
   } else {
     // 公开模式：只获取已发布文章
-    result = await getPublishedArticles(page, limit, tag);
-  }
-
-  // 4. 如果有搜索条件，进行搜索过滤
-  if (search) {
-    // TODO: 实现搜索功能
-    // result = await searchArticles(search, page, limit)
+    if (search) {
+      // 如果有搜索条件，使用搜索功能
+      result = await searchArticles(search, page, limit, tag);
+    } else {
+      // 否则使用常规的文章获取
+      result = await getPublishedArticles(page, limit, tag);
+    }
   }
 
   // 5. 创建分页响应并设置缓存

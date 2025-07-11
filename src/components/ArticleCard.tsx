@@ -1,20 +1,9 @@
 import Link from "next/link";
 import { formatDate } from "@/lib/utils";
+import { ArticleForDisplay } from "@/types/database";
 
 interface ArticleCardProps {
-  article: {
-    id: string;
-    title: string;
-    slug: string;
-    excerpt: string;
-    created_at: string;
-    view_count: number;
-    tags: Array<{
-      id: string;
-      name: string;
-      color: string;
-    }>;
-  };
+  article: ArticleForDisplay;
 }
 
 export default function ArticleCard({ article }: ArticleCardProps) {
@@ -30,18 +19,18 @@ export default function ArticleCard({ article }: ArticleCardProps) {
         {/* 标签 */}
         {article.tags && article.tags.length > 0 && (
           <div className="flex flex-wrap gap-2 mb-3">
-            {article.tags.slice(0, 3).map((tag) => (
+            {article.tags.slice(0, 3).map((tagItem) => (
               <Link
-                key={tag.id}
-                href={`/articles?tag=${tag.name}`}
+                key={tagItem.tag.id}
+                href={`/articles?tag=${tagItem.tag.name}`}
                 className="inline-block px-2 py-1 text-xs font-medium rounded-full transition-colors"
                 style={{
-                  backgroundColor: tag.color + "20",
-                  color: tag.color,
-                  border: `1px solid ${tag.color}40`,
+                  backgroundColor: tagItem.tag.color + "20",
+                  color: tagItem.tag.color,
+                  border: `1px solid ${tagItem.tag.color}40`,
                 }}
               >
-                {tag.name}
+                {tagItem.tag.name}
               </Link>
             ))}
             {article.tags.length > 3 && (
@@ -59,7 +48,7 @@ export default function ArticleCard({ article }: ArticleCardProps) {
 
         {/* 文章摘要 */}
         <p className="text-gray-600 mb-4 line-clamp-3 leading-relaxed">
-          {article.excerpt}
+          {article.excerpt || "暂无摘要"}
         </p>
 
         {/* 文章元信息 */}

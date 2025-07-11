@@ -133,9 +133,14 @@ export type CommentUpdate = Database["public"]["Tables"]["comments"]["Update"];
 
 // 联合查询类型
 export type ArticleWithTags = Article & {
-  tags: Tag[];
+  tags: Array<{
+    tag: Tag;
+  }>;
 };
 
 export type ArticleWithComments = Article & {
   comments: Comment[];
 };
+
+// 前端组件专用类型（与API响应结构完全匹配）
+export type ArticleForDisplay = ArticleWithTags;

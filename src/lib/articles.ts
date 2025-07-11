@@ -12,6 +12,9 @@ export async function getPublishedArticles(
   limit: number = 10,
   tagFilter?: string
 ) {
+  const from = (page - 1) * limit;
+  const to = from + limit - 1;
+
   let query = supabase
     .from("articles")
     .select(
@@ -20,18 +23,54 @@ export async function getPublishedArticles(
       tags:article_tags(
         tag:tags(*)
       )
-    `
+    `,
+      { count: "exact" }
     )
     .eq("published", true)
     .order("created_at", { ascending: false });
 
-  // 如果有标签筛选
+  // 如果有标签筛选，需要先获取有该标签的文章ID
   if (tagFilter) {
-    query = query.contains("tags.tag.name", [tagFilter]);
-  }
+    // 先查找标签ID
+    const { data: tagData, error: tagError } = await supabase
+      .from("tags")
+      .select("id")
+      .eq("name", tagFilter)
+      .single();
 
-  const from = (page - 1) * limit;
-  const to = from + limit - 1;
+    if (tagError || !tagData) {
+      // 如果标签不存在，返回空结果
+      return {
+        articles: [],
+        totalCount: 0,
+        totalPages: 0,
+        currentPage: page,
+      };
+    }
+
+    // 然后查找有该标签的文章ID
+    const { data: taggedArticles, error: articleTagError } = await supabase
+      .from("article_tags")
+      .select("article_id")
+      .eq("tag_id", tagData.id);
+
+    if (articleTagError) {
+      throw new Error(`Failed to filter by tag: ${articleTagError.message}`);
+    }
+
+    if (taggedArticles && taggedArticles.length > 0) {
+      const articleIds = taggedArticles.map((item) => item.article_id);
+      query = query.in("id", articleIds);
+    } else {
+      // 如果没有找到该标签的文章，返回空结果
+      return {
+        articles: [],
+        totalCount: 0,
+        totalPages: 0,
+        currentPage: page,
+      };
+    }
+  }
 
   const { data, error, count } = await query
     .range(from, to)
@@ -137,12 +176,13 @@ export async function deleteArticle(id: string): Promise<void> {
 export async function searchArticles(
   query: string,
   page: number = 1,
-  limit: number = 10
+  limit: number = 10,
+  tagFilter?: string
 ) {
   const from = (page - 1) * limit;
   const to = from + limit - 1;
 
-  const { data, error, count } = await supabase
+  let supabaseQuery = supabase
     .from("articles")
     .select(
       `
@@ -150,12 +190,59 @@ export async function searchArticles(
       tags:article_tags(
         tag:tags(*)
       )
-    `
+    `,
+      { count: "exact" }
     )
     .eq("published", true)
-    .or(`title.ilike.%${query}%,content.ilike.%${query}%`)
-    .order("created_at", { ascending: false })
-    .range(from, to);
+    .or(
+      `title.ilike.%${query}%,content.ilike.%${query}%,excerpt.ilike.%${query}%`
+    )
+    .order("created_at", { ascending: false });
+
+  // 如果有标签筛选，需要先获取有该标签的文章ID
+  if (tagFilter) {
+    // 先查找标签ID
+    const { data: tagData, error: tagError } = await supabase
+      .from("tags")
+      .select("id")
+      .eq("name", tagFilter)
+      .single();
+
+    if (tagError || !tagData) {
+      // 如果标签不存在，返回空结果
+      return {
+        articles: [],
+        totalCount: 0,
+        totalPages: 0,
+        currentPage: page,
+      };
+    }
+
+    // 然后查找有该标签的文章ID
+    const { data: taggedArticles, error: articleTagError } = await supabase
+      .from("article_tags")
+      .select("article_id")
+      .eq("tag_id", tagData.id);
+
+    if (articleTagError) {
+      throw new Error(`Failed to filter by tag: ${articleTagError.message}`);
+    }
+
+    if (taggedArticles && taggedArticles.length > 0) {
+      const articleIds = taggedArticles.map((item) => item.article_id);
+      supabaseQuery = supabaseQuery.in("id", articleIds);
+    } else {
+      // 如果没有找到该标签的文章，返回空结果
+      return {
+        articles: [],
+        totalCount: 0,
+        totalPages: 0,
+        currentPage: page,
+      };
+    }
+  }
+
+  const { data, error, count } = await supabaseQuery.range(from, to);
 
   if (error) {
     throw new Error(`Failed to search articles: ${error.message}`);

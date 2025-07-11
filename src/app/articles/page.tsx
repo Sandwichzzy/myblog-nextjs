@@ -5,20 +5,7 @@ import { useSearchParams } from "next/navigation";
 import ArticleCard from "@/components/ArticleCard";
 import SearchAndFilter from "@/components/SearchAndFilter";
 import Pagination from "@/components/Pagination";
-
-interface Article {
-  id: string;
-  title: string;
-  slug: string;
-  excerpt: string;
-  created_at: string;
-  view_count: number;
-  tags: Array<{
-    id: string;
-    name: string;
-    color: string;
-  }>;
-}
+import { ArticleForDisplay } from "@/types/database";
 
 interface Tag {
   name: string;
@@ -28,7 +15,7 @@ interface Tag {
 
 export default function ArticlesPage() {
   const searchParams = useSearchParams();
-  const [articles, setArticles] = useState<Article[]>([]);
+  const [articles, setArticles] = useState<ArticleForDisplay[]>([]);
   const [tags, setTags] = useState<Tag[]>([]);
   const [loading, setLoading] = useState(true);
   const [currentPage, setCurrentPage] = useState(1);
