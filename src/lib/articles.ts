@@ -118,12 +118,41 @@ export async function getArticleBySlug(
 
 // 增加文章浏览量
 export async function incrementViewCount(articleId: string) {
-  const { error } = await supabase.rpc("increment_view_count", {
-    article_id: articleId,
-  });
+  console.log(`[incrementViewCount] 开始处理文章 ${articleId} 的浏览量增加`);
+
+  // 先获取当前浏览量
+  const { data: currentArticle, error: fetchError } = await supabase
+    .from("articles")
+    .select("view_count")
+    .eq("id", articleId)
+    .single();
+
+  if (fetchError) {
+    console.error("[incrementViewCount] 获取当前浏览量失败:", fetchError);
+    return;
+  }
+
+  const currentViewCount = currentArticle.view_count || 0;
+  const newViewCount = currentViewCount + 1;
+
+  console.log(
+    `[incrementViewCount] 文章 ${articleId} 当前浏览量: ${currentViewCount}, 将更新为: ${newViewCount}`
+  );
+
+  // 增加浏览量
+  const { error } = await supabase
+    .from("articles")
+    .update({
+      view_count: newViewCount,
+    })
+    .eq("id", articleId);
 
   if (error) {
-    console.error("Failed to increment view count:", error);
+    console.error("[incrementViewCount] 更新浏览量失败:", error);
+  } else {
+    console.log(
+      `[incrementViewCount] 成功更新文章 ${articleId} 浏览量: ${currentViewCount} -> ${newViewCount}`
+    );
   }
 }
 
@@ -269,7 +298,8 @@ export async function getAllArticles(page: number = 1, limit: number = 10) {
       tags:article_tags(
         tag:tags(*)
       )
-    `
+    `,
+      { count: "exact" }
     )
     .order("created_at", { ascending: false })
     .range(from, to);

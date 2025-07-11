@@ -1,8 +1,40 @@
 import { supabase, supabaseAdmin } from "./supabase";
 import { Tag, TagInsert, TagUpdate } from "@/types/database";
 
-// 获取所有标签
-export async function getAllTags(): Promise<Tag[]> {
+// 获取所有标签（包含文章计数）
+export async function getAllTags(): Promise<
+  (Tag & { article_count: number })[]
+> {
+  const { data, error } = await supabase
+    .from("tags")
+    .select(
+      `
+      *,
+      article_tags(
+        article_id
+      )
+    `
+    )
+    .order("name");
+
+  if (error) {
+    throw new Error(`Failed to fetch tags: ${error.message}`);
+  }
+
+  // 计算每个标签的文章数量
+  const tagsWithCount = (data || []).map((tag: any) => ({
+    id: tag.id,
+    name: tag.name,
+    color: tag.color,
+    created_at: tag.created_at,
+    article_count: tag.article_tags?.length || 0,
+  }));
+
+  return tagsWithCount;
+}
+
+// 获取所有标签的简单列表（仅用于统计）
+export async function getAllTagsSimple(): Promise<Tag[]> {
   const { data, error } = await supabase.from("tags").select("*").order("name");
 
   if (error) {
@@ -12,29 +44,54 @@ export async function getAllTags(): Promise<Tag[]> {
   return data || [];
 }
 
+// 获取带有文章计数的所有标签（用于筛选组件）
+export async function getTagsWithCount(): Promise<
+  Array<{ name: string; color: string; count: number }>
+> {
+  const { data, error } = await supabase.rpc("get_tags_with_article_count");
+
+  if (error) {
+    // 如果RPC函数不存在，使用备用方法
+    console.warn("RPC function not found, using fallback method");
+    return await getTagsWithCountFallback();
+  }
+
+  return data || [];
+}
+
+// 备用方法：获取标签和文章计数
+async function getTagsWithCountFallback(): Promise<
+  Array<{ name: string; color: string; count: number }>
+> {
+  const { data, error } = await supabase.from("tags").select(`
+      name,
+      color,
+      article_tags(
+        article_id
+      )
+    `);
+
+  if (error) {
+    throw new Error(`Failed to fetch tags with count: ${error.message}`);
+  }
+
+  return (data || []).map((tag: any) => ({
+    name: tag.name,
+    color: tag.color,
+    count: tag.article_tags?.length || 0,
+  }));
+}
+
 // 获取热门标签（基于文章数量）
 export async function getPopularTags(
   limit: number = 10
 ): Promise<(Tag & { article_count: number })[]> {
-  const { data, error } = await supabase
-    .from("tags")
-    .select(
-      `
-      *,
-      article_tags(count)
-    `
-    )
-    .order("article_tags(count)", { ascending: false })
-    .limit(limit);
+  const allTags = await getAllTags();
 
-  if (error) {
-    throw new Error(`Failed to fetch popular tags: ${error.message}`);
-  }
-
-  return (data || []).map((tag) => ({
-    ...tag,
-    article_count: tag.article_tags?.[0]?.count || 0,
-  }));
+  // 按文章数量排序并限制数量
+  return allTags
+    .sort((a, b) => b.article_count - a.article_count)
+    .slice(0, limit);
 }
 
 // 通过名称获取标签

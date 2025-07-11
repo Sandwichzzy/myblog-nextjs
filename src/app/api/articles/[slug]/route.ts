@@ -61,10 +61,10 @@ import {
  */
 async function handleGetArticle(
   req: NextRequest,
-  { params }: { params: { slug: string } }
+  { params }: { params: Promise<{ slug: string }> }
 ) {
   // 1. 验证路径参数
-  const { slug } = params;
+  const { slug } = await params;
   if (!slug) {
     throw ApiErrors.badRequest("缺少文章标识符");
   }
@@ -139,7 +139,7 @@ async function handleGetArticle(
  */
 async function handleUpdateArticle(
   req: NextRequest,
-  { params }: { params: { slug: string } }
+  { params }: { params: Promise<{ slug: string }> }
 ) {
   // 1. 限流检查
   const clientIP = getClientIP(req);
@@ -154,7 +154,7 @@ async function handleUpdateArticle(
   // if (!user) throw ApiErrors.unauthorized('需要管理员权限')
 
   // 3. 验证路径参数
-  const { slug } = params;
+  const { slug } = await params;
   if (!slug) {
     throw ApiErrors.badRequest("缺少文章标识符");
   }
@@ -229,7 +229,7 @@ async function handleUpdateArticle(
  */
 async function handleDeleteArticle(
   req: NextRequest,
-  { params }: { params: { slug: string } }
+  { params }: { params: Promise<{ slug: string }> }
 ) {
   // 1. 限流检查
   const clientIP = getClientIP(req);
@@ -244,7 +244,7 @@ async function handleDeleteArticle(
   // if (!user) throw ApiErrors.unauthorized('需要管理员权限')
 
   // 3. 验证路径参数
-  const { slug } = params;
+  const { slug } = await params;
   if (!slug) {
     throw ApiErrors.badRequest("缺少文章标识符");
   }

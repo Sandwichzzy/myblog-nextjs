@@ -17,7 +17,14 @@ import {
   tagQuerySchema,
   createTagSchema,
 } from "@/lib/validations";
-import { getAllTags, getPopularTags, searchTags, createTag } from "@/lib/tags";
+import {
+  getAllTags,
+  getPopularTags,
+  searchTags,
+  createTag,
+  getTagsWithCount,
+  getTagByName,
+} from "@/lib/tags";
 
 // ============================================================================
 // 标签 API 路由处理器
@@ -66,10 +73,16 @@ async function handleGetTags(req: NextRequest) {
     tags = await getPopularTags(limit);
   } else if (search) {
     // 搜索标签
-    tags = await searchTags(search);
+    const searchResults = await searchTags(search);
+    // 为搜索结果添加文章计数（简化版本，设为0）
+    tags = searchResults.map((tag) => ({
+      name: tag.name,
+      color: tag.color,
+      count: 0,
+    }));
   } else {
-    // 获取所有标签
-    tags = await getAllTags();
+    // 获取所有标签（带文章计数，用于筛选组件）
+    tags = await getTagsWithCount();
   }
 
   // 3. 创建响应并设置缓存
@@ -121,11 +134,10 @@ async function handleCreateTag(req: NextRequest) {
   const { name, color = "#3B82F6" } = validatedData;
 
   // 4. 检查标签名称是否已存在
-  // TODO: 实现标签名称唯一性检查
-  // const existingTag = await getTagByName(name)
-  // if (existingTag) {
-  //   throw ApiErrors.conflict('该标签名称已存在')
-  // }
+  const existingTag = await getTagByName(name);
+  if (existingTag) {
+    throw ApiErrors.conflict(`标签名称 "${name}" 已存在，请使用其他名称`);
+  }
 
   // 5. 创建标签
   const newTag = await createTag({
