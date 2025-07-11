@@ -1,36 +1,299 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# 我的个人博客系统
 
-## Getting Started
+基于 Next.js 15、TypeScript、Supabase 和 Tailwind CSS 构建的现代化个人博客系统。
 
-First, run the development server:
+## 🚀 项目特性
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+- **现代化技术栈**：Next.js 15 + TypeScript + Supabase + Tailwind CSS
+- **服务端渲染**：优化 SEO 和首屏加载速度
+- **增量静态再生**：ISR 策略提升性能
+- **实时评论**：基于 Supabase 的评论系统
+- **标签分类**：文章标签管理和筛选
+- **管理后台**：文章和评论的后台管理
+- **响应式设计**：完美适配各种设备
+
+## 📋 开发进度
+
+### ✅ 第一阶段：项目初始化
+
+- [x] Next.js 项目创建
+- [x] 基础配置完成
+
+### ✅ 第二阶段：数据库设计与集成
+
+- [x] Supabase 客户端配置
+- [x] TypeScript 类型定义
+- [x] 数据库表结构设计
+- [x] 数据访问层实现
+  - [x] 文章 CRUD 操作
+  - [x] 标签管理功能
+  - [x] 评论系统功能
+- [x] 行级安全策略(RLS)配置
+
+### ✅ 第三阶段：API 层实现
+
+- [x] API 路由设计
+  - [x] 文章 API (`/api/articles`, `/api/articles/[slug]`)
+  - [x] 标签 API (`/api/tags`)
+  - [x] 评论 API (`/api/comments`)
+- [x] 数据验证和错误处理
+  - [x] Zod 验证规则
+  - [x] 统一错误处理机制
+  - [x] API 响应格式标准化
+- [x] 缓存策略实现
+  - [x] 响应缓存配置
+  - [x] 限流机制
+  - [x] 安全防护
+
+### ✅ 第四阶段：页面开发
+
+- [x] 基础布局组件
+  - [x] 响应式导航栏 (Navigation)
+  - [x] 页脚组件 (Footer)
+  - [x] 主布局容器 (MainLayout)
+- [x] 文章列表页
+  - [x] 文章卡片组件 (ArticleCard)
+  - [x] 搜索和筛选组件 (SearchAndFilter)
+  - [x] 分页组件 (Pagination)
+  - [x] 文章列表页面 (/articles)
+- [ ] 文章详情页
+- [ ] 文章创建/编辑页
+- [ ] 管理后台页面
+
+### ⏳ 第五阶段：状态管理与数据获取
+
+- [ ] SWR 集成和配置
+- [ ] 数据获取 hooks
+- [ ] 错误处理和加载状态
+
+### ⏳ 第六阶段：性能优化
+
+- [ ] SEO 优化
+- [ ] ISR 增量静态再生
+- [ ] 图片优化
+- [ ] 代码分割
+
+## 🗄️ 数据库结构
+
+### 主要表结构
+
+```sql
+-- 文章表
+articles (
+  id UUID PRIMARY KEY,
+  title VARCHAR(255),
+  slug VARCHAR(255) UNIQUE,
+  content TEXT,
+  excerpt TEXT,
+  author_id UUID,
+  created_at TIMESTAMP,
+  updated_at TIMESTAMP,
+  published BOOLEAN,
+  view_count INTEGER
+)
+
+-- 标签表
+tags (
+  id UUID PRIMARY KEY,
+  name VARCHAR(100) UNIQUE,
+  color VARCHAR(7),
+  created_at TIMESTAMP
+)
+
+-- 文章标签关联表
+article_tags (
+  article_id UUID REFERENCES articles(id),
+  tag_id UUID REFERENCES tags(id),
+  created_at TIMESTAMP
+)
+
+-- 评论表
+comments (
+  id UUID PRIMARY KEY,
+  article_id UUID REFERENCES articles(id),
+  author_name VARCHAR(100),
+  author_email VARCHAR(255),
+  content TEXT,
+  created_at TIMESTAMP,
+  published BOOLEAN
+)
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## 🛠️ 已实现功能
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+### API 层架构
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+- **统一响应格式**：标准化的 JSON API 响应结构
+- **数据验证**：基于 Zod 的严格输入验证
+- **错误处理**：全面的错误捕获和格式化
+- **缓存策略**：智能缓存配置优化性能
+- **安全防护**：限流、内容清理、XSS 防护
+- **类型安全**：完整的 TypeScript 类型支持
 
-## Learn More
+### API 端点
 
-To learn more about Next.js, take a look at the following resources:
+#### 文章 API
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+- `GET /api/articles` - 获取文章列表（支持分页、搜索、标签筛选）
+- `POST /api/articles` - 创建新文章（管理员）
+- `GET /api/articles/[slug]` - 获取文章详情
+- `PUT /api/articles/[slug]` - 更新文章（管理员）
+- `DELETE /api/articles/[slug]` - 删除文章（管理员）
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+#### 标签 API
 
-## Deploy on Vercel
+- `GET /api/tags` - 获取标签列表（支持搜索、热门标签）
+- `POST /api/tags` - 创建新标签（管理员）
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+#### 评论 API
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+- `GET /api/comments` - 获取评论列表（支持按文章筛选、审核状态）
+- `POST /api/comments` - 创建新评论（公开）
+
+### 数据访问层
+
+- **文章管理**
+
+  - 获取已发布文章列表（支持分页和标签筛选）
+  - 通过 slug 获取文章详情
+  - 文章搜索功能
+  - 文章 CRUD 操作（管理员）
+  - 浏览量统计
+
+- **标签系统**
+
+  - 标签 CRUD 操作
+  - 热门标签获取
+  - 标签搜索
+  - 文章标签关联管理
+
+- **评论功能**
+  - 评论创建和展示
+  - 评论审核系统
+  - 评论统计和管理
+
+### 用户界面组件
+
+- **布局组件**
+
+  - 响应式导航栏（支持移动端菜单）
+  - 页脚组件（包含链接和版权信息）
+  - 主布局容器（统一页面结构）
+
+- **文章展示组件**
+
+  - 文章卡片组件（展示文章信息和标签）
+  - 搜索和筛选组件（支持关键词搜索和标签筛选）
+  - 分页组件（智能分页导航）
+
+- **页面组件**
+
+  - 首页（Hero 区块和最新文章展示）
+  - 文章列表页（完整的文章浏览体验）
+  - 空状态处理（无数据时的友好提示）
+
+- **交互功能**
+  - 防抖搜索（优化搜索体验）
+  - 筛选状态管理（实时筛选反馈）
+  - 加载状态指示器（骨架屏加载效果）
+  - 响应式设计（适配各种设备）
+
+## 🔧 环境配置
+
+1. **环境变量设置**
+   创建 `.env.local` 文件并配置以下变量：
+
+   ```env
+   NEXT_PUBLIC_SUPABASE_URL=your-project-url
+   NEXT_PUBLIC_SUPABASE_ANON_KEY=your-anon-key
+   SUPABASE_SERVICE_ROLE_KEY=your-service-role-key
+   DATABASE_URL=your-database-url
+   ```
+
+2. **数据库初始化**
+   在 Supabase 中运行 `database/schema.sql` 脚本来创建表结构
+
+3. **启动开发服务器**
+   ```bash
+   npm run dev
+   ```
+
+## 📁 项目结构
+
+```
+my-blog/
+├── src/
+│   ├── app/          # Next.js App Router 页面和API
+│   │   ├── api/      # API 路由
+│   │   │   ├── articles/
+│   │   │   │   ├── route.ts      # 文章列表API
+│   │   │   │   └── [slug]/
+│   │   │   │       └── route.ts  # 文章详情API
+│   │   │   ├── tags/
+│   │   │   │   └── route.ts      # 标签API
+│   │   │   └── comments/
+│   │   │       └── route.ts      # 评论API
+│   │   ├── articles/
+│   │   │   └── page.tsx          # 文章列表页
+│   │   ├── layout.tsx            # 根布局
+│   │   ├── page.tsx              # 首页
+│   │   └── globals.css           # 全局样式
+│   ├── components/   # React 组件
+│   │   ├── Navigation.tsx        # 导航栏组件
+│   │   ├── Footer.tsx            # 页脚组件
+│   │   ├── MainLayout.tsx        # 主布局容器
+│   │   ├── ArticleCard.tsx       # 文章卡片组件
+│   │   ├── SearchAndFilter.tsx   # 搜索筛选组件
+│   │   ├── Pagination.tsx        # 分页组件
+│   │   └── index.ts              # 组件导出
+│   ├── lib/          # 工具函数和数据访问层
+│   │   ├── supabase.ts      # Supabase 客户端配置
+│   │   ├── articles.ts      # 文章数据访问
+│   │   ├── tags.ts          # 标签数据访问
+│   │   ├── comments.ts      # 评论数据访问
+│   │   ├── validations.ts   # API 数据验证规则
+│   │   ├── api-utils.ts     # API 工具函数
+│   │   └── utils.ts         # 通用工具函数
+│   └── types/        # TypeScript 类型定义
+│       └── database.ts      # 数据库类型
+├── database/         # 数据库脚本
+│   └── schema.sql    # 数据库表结构
+├── docs/            # 项目文档
+│   └── supabase-setup-guide.md
+└── public/          # 静态资源
+```
+
+## 🎯 下一步计划
+
+准备进入第四阶段的第三步：文章详情页开发，包括：
+
+1. **文章详情页**
+
+   - 文章内容展示组件
+   - 文章元信息展示
+   - 标签和分类显示
+   - 相关文章推荐
+
+2. **评论系统界面**
+
+   - 评论列表组件
+   - 评论表单组件
+   - 评论回复功能
+   - 评论管理界面
+
+3. **内容优化**
+
+   - 代码高亮显示
+   - 图片懒加载
+   - 目录导航
+   - 阅读进度指示
+
+4. **SEO 优化**
+   - 动态页面标题
+   - 元数据设置
+   - 结构化数据
+   - Open Graph 支持
+
+## 🚀 部署
+
+项目最终将部署到 Vercel 平台，利用其无服务器函数和全球 CDN 优化性能。
