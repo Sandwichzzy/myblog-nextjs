@@ -1,6 +1,19 @@
 import Image from "next/image";
+import Link from "next/link";
+import { getPublishedArticles } from "@/lib/articles";
+import ArticleCard from "@/components/ArticleCard";
+import { ArticleForDisplay } from "@/types/database";
 
-export default function Home() {
+export default async function Home() {
+  // 获取最新的三篇文章
+  let latestArticles: ArticleForDisplay[] = [];
+  try {
+    const result = await getPublishedArticles(1, 3); // 获取第1页，3篇文章
+    latestArticles = result.articles;
+  } catch (error) {
+    console.error("获取最新文章失败:", error);
+  }
+
   return (
     <div className="bg-white">
       {/* Hero Section */}
@@ -14,18 +27,18 @@ export default function Home() {
               分享技术思考与生活感悟，记录成长的每一步
             </p>
             <div className="space-x-4">
-              <a
+              <Link
                 href="/articles"
                 className="bg-white text-blue-600 px-8 py-3 rounded-lg font-semibold hover:bg-gray-100 transition-colors inline-block"
               >
                 阅读文章
-              </a>
-              <a
+              </Link>
+              <Link
                 href="/about"
                 className="border-2 border-white text-white px-8 py-3 rounded-lg font-semibold hover:bg-white hover:text-blue-600 transition-colors inline-block"
               >
                 关于我
-              </a>
+              </Link>
             </div>
           </div>
         </div>
@@ -43,41 +56,42 @@ export default function Home() {
             </p>
           </div>
 
-          {/* 文章列表占位符 */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {[1, 2, 3].map((item) => (
-              <div
-                key={item}
-                className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow"
+          {/* 文章列表 */}
+          {latestArticles.length > 0 ? (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+              {latestArticles.map((article) => (
+                <ArticleCard key={article.id} article={article} />
+              ))}
+            </div>
+          ) : (
+            <div className="text-center py-12">
+              <div className="text-gray-400 text-6xl mb-4">📝</div>
+              <h3 className="text-xl font-semibold text-gray-900 mb-2">
+                暂无文章
+              </h3>
+              <p className="text-gray-600 mb-6">
+                还没有发布任何文章，敬请期待！
+              </p>
+              <Link
+                href="/admin/articles/new"
+                className="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 transition-colors inline-block"
               >
-                <div className="h-48 bg-gray-200 flex items-center justify-center">
-                  <span className="text-gray-500">文章封面</span>
-                </div>
-                <div className="p-6">
-                  <h3 className="text-xl font-semibold text-gray-900 mb-2">
-                    文章标题 {item}
-                  </h3>
-                  <p className="text-gray-600 mb-4">
-                    这里是文章的摘要内容，简要介绍文章的主要内容和观点...
-                  </p>
-                  <div className="flex items-center text-sm text-gray-500">
-                    <span>2024-01-01</span>
-                    <span className="mx-2">•</span>
-                    <span>阅读时间: 5 分钟</span>
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
+                创建第一篇文章
+              </Link>
+            </div>
+          )}
 
-          <div className="text-center mt-12">
-            <a
-              href="/articles"
-              className="bg-blue-600 text-white px-8 py-3 rounded-lg font-semibold hover:bg-blue-700 transition-colors inline-block"
-            >
-              查看更多文章
-            </a>
-          </div>
+          {/* 查看更多按钮 */}
+          {latestArticles.length > 0 && (
+            <div className="text-center mt-12">
+              <Link
+                href="/articles"
+                className="bg-blue-600 text-white px-8 py-3 rounded-lg font-semibold hover:bg-blue-700 transition-colors inline-block"
+              >
+                查看更多文章
+              </Link>
+            </div>
+          )}
         </div>
       </section>
     </div>

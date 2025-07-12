@@ -85,9 +85,9 @@ async function handleGetArticles(req: NextRequest) {
     result = await getAllArticles(page, limit);
   } else {
     // 公开模式：只获取已发布文章
-    if (search) {
+    if (search && search.trim()) {
       // 如果有搜索条件，使用搜索功能
-      result = await searchArticles(search, page, limit, tag);
+      result = await searchArticles(search.trim(), page, limit, tag);
     } else {
       // 否则使用常规的文章获取
       result = await getPublishedArticles(page, limit, tag);

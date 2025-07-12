@@ -211,6 +211,9 @@ export async function searchArticles(
   const from = (page - 1) * limit;
   const to = from + limit - 1;
 
+  // 清理搜索关键词
+  const cleanQuery = query.trim();
+
   let supabaseQuery = supabase
     .from("articles")
     .select(
@@ -222,11 +225,14 @@ export async function searchArticles(
     `,
       { count: "exact" }
     )
-    .eq("published", true)
-    .or(
-      `title.ilike.%${query}%,content.ilike.%${query}%,excerpt.ilike.%${query}%`
-    )
-    .order("created_at", { ascending: false });
+    .eq("published", true);
+
+  // 如果有搜索关键词，则添加搜索条件
+  if (cleanQuery) {
+    supabaseQuery = supabaseQuery.or(
+      `title.ilike.%${cleanQuery}%,content.ilike.%${cleanQuery}%,excerpt.ilike.%${cleanQuery}%`
+    );
+  }
 
   // 如果有标签筛选，需要先获取有该标签的文章ID
   if (tagFilter) {
@@ -271,10 +277,14 @@ export async function searchArticles(
     }
   }
 
-  const { data, error, count } = await supabaseQuery.range(from, to);
+  // 添加排序和分页
+  const { data, error, count } = await supabaseQuery
+    .order("created_at", { ascending: false })
+    .range(from, to);
 
   if (error) {
-    throw new Error(`Failed to search articles: ${error.message}`);
+    console.error("搜索文章时出错:", error);
+    throw new Error(`搜索文章失败: ${error.message}`);
   }
 
   return {
