@@ -1,6 +1,6 @@
 import { notFound } from "next/navigation";
 import { Suspense } from "react";
-import { getArticleBySlug } from "@/lib/articles";
+import { getArticleBySlugAdmin } from "@/lib/articles";
 import { ArticleForm } from "@/components";
 
 interface PageProps {
@@ -11,7 +11,7 @@ export default async function EditArticlePage({ params }: PageProps) {
   const { slug } = await params;
 
   // 获取文章数据
-  const article = await getArticleBySlug(slug);
+  const article = await getArticleBySlugAdmin(slug);
 
   if (!article) {
     notFound();
@@ -33,10 +33,22 @@ export default async function EditArticlePage({ params }: PageProps) {
           fallback={
             <div className="bg-white rounded-lg shadow-sm p-8">
               <div className="animate-pulse space-y-6">
-                <div className="h-10 bg-gray-200 rounded"></div>
-                <div className="h-10 bg-gray-200 rounded"></div>
-                <div className="h-64 bg-gray-200 rounded"></div>
-                <div className="h-10 bg-gray-200 rounded"></div>
+                <div
+                  key="skeleton-1"
+                  className="h-10 bg-gray-200 rounded"
+                ></div>
+                <div
+                  key="skeleton-2"
+                  className="h-10 bg-gray-200 rounded"
+                ></div>
+                <div
+                  key="skeleton-3"
+                  className="h-64 bg-gray-200 rounded"
+                ></div>
+                <div
+                  key="skeleton-4"
+                  className="h-10 bg-gray-200 rounded"
+                ></div>
               </div>
             </div>
           }
@@ -50,7 +62,7 @@ export default async function EditArticlePage({ params }: PageProps) {
 
 export async function generateMetadata({ params }: PageProps) {
   const { slug } = await params;
-  const article = await getArticleBySlug(slug);
+  const article = await getArticleBySlugAdmin(slug);
 
   return {
     title: `编辑文章: ${article?.title || "未找到"} - 我的博客管理后台`,

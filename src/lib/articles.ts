@@ -116,6 +116,33 @@ export async function getArticleBySlug(
   return data as ArticleWithTags;
 }
 
+// 管理员专用：通过slug获取任何文章（包括草稿）
+export async function getArticleBySlugAdmin(
+  slug: string
+): Promise<ArticleWithTags | null> {
+  const { data, error } = await supabaseAdmin
+    .from("articles")
+    .select(
+      `
+      *,
+      tags:article_tags(
+        tag:tags(*)
+      )
+    `
+    )
+    .eq("slug", slug)
+    .single();
+
+  if (error) {
+    if (error.code === "PGRST116") {
+      return null; // 文章不存在
+    }
+    throw new Error(`Failed to fetch article: ${error.message}`);
+  }
+
+  return data as ArticleWithTags;
+}
+
 // 增加文章浏览量
 export async function incrementViewCount(articleId: string) {
   console.log(`[incrementViewCount] 开始处理文章 ${articleId} 的浏览量增加`);

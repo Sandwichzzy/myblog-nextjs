@@ -85,10 +85,12 @@ export async function getPendingComments(
     throw new Error(`Failed to fetch pending comments: ${error.message}`);
   }
 
-  const commentsWithTitles = (data || []).map((comment: any) => ({
-    ...comment,
-    article_title: comment.article?.title,
-  }));
+  const commentsWithTitles = (data || []).map(
+    (comment: Comment & { article?: { title?: string } }) => ({
+      ...comment,
+      article_title: comment.article?.title,
+    })
+  );
 
   return {
     comments: commentsWithTitles,
@@ -207,8 +209,11 @@ export async function getRecentComments(
     throw new Error(`Failed to fetch recent comments: ${error.message}`);
   }
 
-  return (data || []).map((comment: any) => ({
-    ...comment,
-    article_title: comment.article?.title,
-  }));
+  return (data || []).map(
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    (comment: any) => ({
+      ...comment,
+      article_title: comment.article?.title,
+    })
+  );
 }

@@ -4,7 +4,6 @@ import {
   withMethodCheck,
   createSuccessResponse,
   createPaginatedResponse,
-  createErrorResponse,
   extractQueryParams,
   parseJsonBody,
   withCache,
@@ -17,8 +16,6 @@ import {
   validateBody,
   articleQuerySchema,
   createArticleSchema,
-  ArticleQueryParams,
-  CreateArticleInput,
 } from "@/lib/validations";
 import {
   getPublishedArticles,
@@ -27,7 +24,6 @@ import {
   addTagsToArticle,
   searchArticles,
 } from "@/lib/articles";
-import { createTagsIfNotExist } from "@/lib/tags";
 
 // ============================================================================
 // 文章 API 路由处理器
@@ -77,11 +73,9 @@ async function handleGetArticles(req: NextRequest) {
   // 3. 根据权限选择合适的查询函数
   let result;
 
-  if (
-    published === false ||
-    (published === undefined && process.env.NODE_ENV === "development")
-  ) {
+  if (published === false) {
     // 管理员模式：获取所有文章（包括草稿）
+    // 注意：此处需要管理员权限验证
     result = await getAllArticles(page, limit);
   } else {
     // 公开模式：只获取已发布文章
@@ -106,10 +100,15 @@ async function handleGetArticles(req: NextRequest) {
     "文章列表获取成功"
   );
 
-  // 6. 设置缓存策略
-  // 已发布文章缓存5分钟，草稿文章不缓存
+  // 6. 设置缓存策略 - 个人博客项目优化版
   if (published !== false) {
-    return withCache(response, 300, 600); // 5分钟缓存，10分钟stale-while-revalidate
+    // 开发环境不缓存，生产环境短时间缓存
+    if (process.env.NODE_ENV === "development") {
+      return response; // 开发时不缓存，方便调试
+    }
+
+    // 生产环境使用30秒缓存，平衡性能和实时性
+    return withCache(response, 30, 90); // 30秒缓存，90秒stale-while-revalidate
   }
 
   return response;

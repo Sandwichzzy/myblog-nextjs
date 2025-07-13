@@ -2,6 +2,9 @@ import Link from "next/link";
 import { getPublishedArticles, getAllArticles } from "@/lib/articles";
 import { getAllTagsSimple } from "@/lib/tags";
 
+// 强制动态渲染，避免在构建时获取数据
+export const dynamic = "force-dynamic";
+
 export default async function AdminDashboard() {
   // 获取统计数据
   const [publishedResult, allResult, tags] = await Promise.all([
@@ -13,6 +16,7 @@ export default async function AdminDashboard() {
   const recentArticles = publishedResult.articles;
   const totalArticles = allResult.totalCount;
   const publishedCount = allResult.articles.filter(
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     (a: any) => a.published
   ).length;
   const draftCount = totalArticles - publishedCount;
@@ -213,42 +217,45 @@ export default async function AdminDashboard() {
 
             <div className="space-y-4">
               {recentArticles.length > 0 ? (
-                recentArticles.map((article: any) => (
-                  <div
-                    key={article.id}
-                    className="flex items-center justify-between p-4 border border-gray-200 rounded-lg"
-                  >
-                    <div className="flex-1">
-                      <h3 className="font-medium text-gray-900">
-                        {article.title}
-                      </h3>
-                      <p className="text-sm text-gray-500 mt-1">
-                        发布于{" "}
-                        {new Date(article.created_at).toLocaleDateString(
-                          "zh-CN"
-                        )}
-                        • {article.view_count} 次浏览
-                      </p>
+                recentArticles.map(
+                  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                  (article: any) => (
+                    <div
+                      key={article.id}
+                      className="flex items-center justify-between p-4 border border-gray-200 rounded-lg"
+                    >
+                      <div className="flex-1">
+                        <h3 className="font-medium text-gray-900">
+                          {article.title}
+                        </h3>
+                        <p className="text-sm text-gray-500 mt-1">
+                          发布于{" "}
+                          {new Date(article.created_at).toLocaleDateString(
+                            "zh-CN"
+                          )}
+                          • {article.view_count} 次浏览
+                        </p>
+                      </div>
+                      <div className="flex items-center space-x-2">
+                        <span
+                          className={`px-2 py-1 text-xs rounded-full ${
+                            article.published
+                              ? "bg-green-100 text-green-800"
+                              : "bg-yellow-100 text-yellow-800"
+                          }`}
+                        >
+                          {article.published ? "已发布" : "草稿"}
+                        </span>
+                        <Link
+                          href={`/admin/articles/${article.slug}/edit`}
+                          className="text-blue-600 hover:text-blue-800 text-sm"
+                        >
+                          编辑
+                        </Link>
+                      </div>
                     </div>
-                    <div className="flex items-center space-x-2">
-                      <span
-                        className={`px-2 py-1 text-xs rounded-full ${
-                          article.published
-                            ? "bg-green-100 text-green-800"
-                            : "bg-yellow-100 text-yellow-800"
-                        }`}
-                      >
-                        {article.published ? "已发布" : "草稿"}
-                      </span>
-                      <Link
-                        href={`/admin/articles/${article.slug}/edit`}
-                        className="text-blue-600 hover:text-blue-800 text-sm"
-                      >
-                        编辑
-                      </Link>
-                    </div>
-                  </div>
-                ))
+                  )
+                )
               ) : (
                 <div className="text-center py-8">
                   <svg

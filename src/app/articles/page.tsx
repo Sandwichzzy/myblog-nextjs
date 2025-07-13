@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 import ArticleCard from "@/components/ArticleCard";
 import SearchAndFilter from "@/components/SearchAndFilter";
@@ -13,7 +13,7 @@ interface Tag {
   count: number;
 }
 
-export default function ArticlesPage() {
+function ArticlesPageContent() {
   const searchParams = useSearchParams();
   const [articles, setArticles] = useState<ArticleForDisplay[]>([]);
   const [tags, setTags] = useState<Tag[]>([]);
@@ -29,17 +29,33 @@ export default function ArticlesPage() {
     const tag = searchParams.get("tag");
     const query = searchParams.get("search");
     const page = searchParams.get("page");
+    const refresh = searchParams.get("refresh");
+
+    // 使用URL参数的值，而不是状态值
+    const currentTag = tag || "";
+    const currentQuery = query || "";
+    const currentPageNum = page ? parseInt(page) : 1;
 
     if (tag) setSelectedTag(tag);
     if (query) setSearchQuery(query);
-    if (page) setCurrentPage(parseInt(page));
+    if (page) setCurrentPage(currentPageNum);
+
+    // 如果有refresh参数，立即刷新数据（使用URL参数的值）
+    if (refresh) {
+      fetchArticles(currentPageNum, currentQuery, currentTag, true);
+      // 清除URL中的refresh参数
+      const url = new URL(window.location.href);
+      url.searchParams.delete("refresh");
+      window.history.replaceState({}, "", url.toString());
+    }
   }, [searchParams]);
 
   // 获取文章数据
   const fetchArticles = async (
     page: number = 1,
     search: string = "",
-    tag: string = ""
+    tag: string = "",
+    forceRefresh: boolean = false
   ) => {
     setLoading(true);
     try {
@@ -48,9 +64,14 @@ export default function ArticlesPage() {
         limit: "9",
         ...(search && { search }),
         ...(tag && { tag }),
+        // 添加时间戳参数来绕过缓存
+        ...(forceRefresh && { _t: Date.now().toString() }),
       });
 
-      const response = await fetch(`/api/articles?${params}`);
+      const response = await fetch(`/api/articles?${params}`, {
+        // 强制刷新时不使用缓存
+        cache: forceRefresh ? "no-cache" : "default",
+      });
       const data = await response.json();
 
       if (data.success) {
@@ -187,5 +208,30 @@ export default function ArticlesPage() {
         )}
       </div>
     </div>
+  );
+}
+
+export default function ArticlesPage() {
+  return (
+    <Suspense
+      fallback={
+        <div className="min-h-screen bg-gray-50">
+          <div className="bg-white border-b">
+            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+              <h1 className="text-3xl font-bold text-gray-900">文章列表</h1>
+              <p className="mt-2 text-gray-600">加载中...</p>
+            </div>
+          </div>
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+            <div className="text-center">
+              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500 mx-auto mb-4"></div>
+              <p className="text-gray-600">加载中...</p>
+            </div>
+          </div>
+        </div>
+      }
+    >
+      <ArticlesPageContent />
+    </Suspense>
   );
 }

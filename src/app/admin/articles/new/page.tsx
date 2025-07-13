@@ -16,10 +16,22 @@ export default function NewArticlePage() {
           fallback={
             <div className="bg-white rounded-lg shadow-sm p-8">
               <div className="animate-pulse space-y-6">
-                <div className="h-10 bg-gray-200 rounded"></div>
-                <div className="h-10 bg-gray-200 rounded"></div>
-                <div className="h-64 bg-gray-200 rounded"></div>
-                <div className="h-10 bg-gray-200 rounded"></div>
+                <div
+                  key="skeleton-1"
+                  className="h-10 bg-gray-200 rounded"
+                ></div>
+                <div
+                  key="skeleton-2"
+                  className="h-10 bg-gray-200 rounded"
+                ></div>
+                <div
+                  key="skeleton-3"
+                  className="h-64 bg-gray-200 rounded"
+                ></div>
+                <div
+                  key="skeleton-4"
+                  className="h-10 bg-gray-200 rounded"
+                ></div>
               </div>
             </div>
           }

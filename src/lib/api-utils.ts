@@ -172,12 +172,12 @@ function formatZodError(error: ZodError): string {
  * @param handler API处理函数
  * @returns 包装后的处理函数
  */
-export function withApiHandler<T extends any[]>(
-  handler: (...args: T) => Promise<NextResponse | Response>
+export function withApiHandler<T>(
+  handler: (req: NextRequest, context: T) => Promise<NextResponse | Response>
 ) {
-  return async (...args: T): Promise<NextResponse> => {
+  return async (req: NextRequest, context: T): Promise<NextResponse> => {
     try {
-      const result = await handler(...args);
+      const result = await handler(req, context);
       return result instanceof NextResponse
         ? result
         : new NextResponse(result.body, result);
@@ -200,10 +200,10 @@ export function withApiHandler<T extends any[]>(
  * @returns 中间件函数
  */
 export function withMethodCheck(allowedMethods: string[]) {
-  return function (
-    handler: (req: NextRequest, context?: any) => Promise<NextResponse>
+  return function <T>(
+    handler: (req: NextRequest, context: T) => Promise<NextResponse>
   ) {
-    return async (req: NextRequest, context?: any): Promise<NextResponse> => {
+    return async (req: NextRequest, context: T): Promise<NextResponse> => {
       if (!allowedMethods.includes(req.method)) {
         return createErrorResponse(
           `方法 ${req.method} 不被允许。支持的方法: ${allowedMethods.join(
@@ -227,11 +227,11 @@ export function withMethodCheck(allowedMethods: string[]) {
  * @param req NextRequest对象
  * @returns 解析后的JSON数据
  */
-export async function parseJsonBody(req: NextRequest): Promise<any> {
+export async function parseJsonBody(req: NextRequest): Promise<unknown> {
   try {
     const text = await req.text();
     return text ? JSON.parse(text) : {};
-  } catch (error) {
+  } catch {
     throw ApiErrors.badRequest("无效的JSON格式");
   }
 }
@@ -291,8 +291,10 @@ export function generateSlug(title: string): string {
  * @returns 是否唯一
  */
 export async function isSlugUnique(
-  slug: string,
-  excludeId?: string
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  _slug: string,
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  _excludeId?: string
 ): Promise<boolean> {
   // 这里需要调用数据库查询，暂时返回true
   // 在实际实现中会导入相关的数据库查询函数
@@ -309,7 +311,7 @@ export async function generateUniqueSlug(
   title: string,
   excludeId?: string
 ): Promise<string> {
-  let baseSlug = generateSlug(title);
+  const baseSlug = generateSlug(title);
   let slug = baseSlug;
   let counter = 1;
 

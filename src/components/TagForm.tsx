@@ -31,7 +31,8 @@ export default function TagForm() {
 
       if (result.success && result.data) {
         const existingTag = result.data.find(
-          (tag: any) => tag.name.toLowerCase() === name.toLowerCase()
+          (tag: { name: string }) =>
+            tag.name.toLowerCase() === name.toLowerCase()
         );
 
         if (existingTag) {

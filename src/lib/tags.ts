@@ -22,13 +22,15 @@ export async function getAllTags(): Promise<
   }
 
   // 计算每个标签的文章数量
-  const tagsWithCount = (data || []).map((tag: any) => ({
-    id: tag.id,
-    name: tag.name,
-    color: tag.color,
-    created_at: tag.created_at,
-    article_count: tag.article_tags?.length || 0,
-  }));
+  const tagsWithCount = (data || []).map(
+    (tag: Tag & { article_tags?: unknown[] }) => ({
+      id: tag.id,
+      name: tag.name,
+      color: tag.color,
+      created_at: tag.created_at,
+      article_count: tag.article_tags?.length || 0,
+    })
+  );
 
   return tagsWithCount;
 }
@@ -46,7 +48,7 @@ export async function getAllTagsSimple(): Promise<Tag[]> {
 
 // 获取带有文章计数的所有标签（用于筛选组件）
 export async function getTagsWithCount(): Promise<
-  Array<{ name: string; color: string; count: number }>
+  Array<{ id: string; name: string; color: string; count: number }>
 > {
   const { data, error } = await supabase.rpc("get_tags_with_article_count");
 
@@ -61,9 +63,10 @@ export async function getTagsWithCount(): Promise<
 
 // 备用方法：获取标签和文章计数
 async function getTagsWithCountFallback(): Promise<
-  Array<{ name: string; color: string; count: number }>
+  Array<{ id: string; name: string; color: string; count: number }>
 > {
   const { data, error } = await supabase.from("tags").select(`
+      id,
       name,
       color,
       article_tags(
@@ -75,7 +78,9 @@ async function getTagsWithCountFallback(): Promise<
     throw new Error(`Failed to fetch tags with count: ${error.message}`);
   }
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   return (data || []).map((tag: any) => ({
+    id: tag.id,
     name: tag.name,
     color: tag.color,
     count: tag.article_tags?.length || 0,
@@ -183,9 +188,13 @@ export async function getArticleTags(articleId: string): Promise<Tag[]> {
     throw new Error(`Failed to fetch article tags: ${error.message}`);
   }
 
-  return (data || [])
-    .map((item: any) => item.tag)
-    .filter((tag: any): tag is Tag => tag !== null && tag !== undefined);
+  return (
+    (data || [])
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      .map((item: any) => item.tag)
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      .filter((tag: any): tag is Tag => tag !== null && tag !== undefined)
+  );
 }
 
 // 批量创建标签（如果不存在）

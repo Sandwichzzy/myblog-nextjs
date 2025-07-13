@@ -3,7 +3,6 @@ import {
   withApiHandler,
   withMethodCheck,
   createSuccessResponse,
-  createErrorResponse,
   parseJsonBody,
   withCache,
   getClientIP,
@@ -17,6 +16,7 @@ import {
 } from "@/lib/validations";
 import {
   getArticleBySlug,
+  getArticleBySlugAdmin,
   updateArticle,
   deleteArticle,
   incrementViewCount,
@@ -72,7 +72,7 @@ async function handleGetArticle(
   // 2. 验证slug格式
   try {
     slugParamSchema.parse({ slug });
-  } catch (error) {
+  } catch {
     throw ApiErrors.badRequest("无效的文章标识符格式");
   }
 
@@ -160,7 +160,7 @@ async function handleUpdateArticle(
   }
 
   // 4. 检查文章是否存在
-  const existingArticle = await getArticleBySlug(slug);
+  const existingArticle = await getArticleBySlugAdmin(slug);
   if (!existingArticle) {
     throw ApiErrors.notFound("文章不存在");
   }
@@ -188,7 +188,13 @@ async function handleUpdateArticle(
   }
 
   // 7. 准备更新数据
-  const updateData: any = {};
+  const updateData: Partial<{
+    title: string;
+    slug: string;
+    content: string;
+    excerpt: string | null;
+    published: boolean;
+  }> = {};
   if (title !== undefined) updateData.title = title;
   if (newSlug !== undefined) updateData.slug = newSlug;
   if (content !== undefined) updateData.content = content;
@@ -250,7 +256,7 @@ async function handleDeleteArticle(
   }
 
   // 4. 检查文章是否存在
-  const existingArticle = await getArticleBySlug(slug);
+  const existingArticle = await getArticleBySlugAdmin(slug);
   if (!existingArticle) {
     throw ApiErrors.notFound("文章不存在");
   }

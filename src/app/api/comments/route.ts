@@ -23,7 +23,6 @@ import {
   getArticleComments,
   getPendingComments,
   createComment,
-  getCommentStats,
 } from "@/lib/comments";
 
 // ============================================================================

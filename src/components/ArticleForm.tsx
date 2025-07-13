@@ -50,7 +50,7 @@ export default function ArticleForm({
     content: article?.content || "",
     excerpt: article?.excerpt || "",
     published: article?.published || false,
-    tagIds: article?.tags?.map((t: any) => t.tag.id) || [],
+    tagIds: article?.tags?.map((t: { tag: { id: string } }) => t.tag.id) || [],
   });
 
   // 加载可用标签
@@ -61,6 +61,8 @@ export default function ArticleForm({
         const result = await response.json();
         if (result.success) {
           setAvailableTags(result.data);
+        } else {
+          console.error("获取标签失败:", result);
         }
       } catch (error) {
         console.error("加载标签失败:", error);
@@ -89,6 +91,12 @@ export default function ArticleForm({
 
   // 处理标签选择
   const handleTagToggle = (tagId: string) => {
+    // 防护措施：检查tagId是否有效
+    if (!tagId) {
+      console.error("tagId is undefined or empty:", tagId);
+      return;
+    }
+
     const isSelected = formData.tagIds.includes(tagId);
     const newTagIds = isSelected
       ? formData.tagIds.filter((id) => id !== tagId)
@@ -161,7 +169,8 @@ export default function ArticleForm({
         // 延迟跳转，让用户看到成功消息
         setTimeout(() => {
           if (mode === "create") {
-            router.push(`/articles/${result.data.slug}`);
+            // 添加时间戳参数强制刷新缓存
+            router.push(`/articles?refresh=${Date.now()}`);
           } else {
             router.push(`/articles/${result.data.slug}`);
           }
@@ -268,32 +277,55 @@ export default function ArticleForm({
         {/* 标签选择 */}
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-2">
-            文章标签
+            文章标签（支持多选）
           </label>
-          <div className="flex flex-wrap gap-2">
-            {availableTags.map((tag) => (
-              <button
-                key={tag.id}
-                type="button"
-                onClick={() => handleTagToggle(tag.id)}
-                className={`px-3 py-1 rounded-full text-sm border transition-colors ${
-                  formData.tagIds.includes(tag.id)
-                    ? "bg-blue-100 border-blue-300 text-blue-800"
-                    : "bg-gray-50 border-gray-300 text-gray-700 hover:bg-gray-100"
-                }`}
-                style={{
-                  backgroundColor: formData.tagIds.includes(tag.id)
-                    ? `${tag.color}20`
-                    : undefined,
-                  borderColor: formData.tagIds.includes(tag.id)
-                    ? tag.color
-                    : undefined,
-                }}
+          {availableTags.length > 0 ? (
+            <div className="flex flex-wrap gap-2">
+              {availableTags.map((tag) => {
+                // 每个标签独立判断选中状态
+                const isSelected = formData.tagIds.includes(tag.id);
+                return (
+                  <button
+                    key={tag.id}
+                    type="button"
+                    onClick={() => handleTagToggle(tag.id)}
+                    className={`px-3 py-1 rounded-full text-sm border transition-all duration-200 ${
+                      isSelected
+                        ? "text-white font-medium shadow-sm"
+                        : "text-gray-700 hover:bg-gray-100"
+                    }`}
+                    style={{
+                      backgroundColor: isSelected ? tag.color : "transparent",
+                      borderColor: isSelected ? tag.color : "#d1d5db",
+                    }}
+                  >
+                    {isSelected && <span className="mr-1">✓</span>}
+                    {tag.name}
+                  </button>
+                );
+              })}
+            </div>
+          ) : (
+            <div className="text-gray-500 text-sm">
+              加载标签中... 如果标签未显示，请确认您已在{" "}
+              <a
+                href="/admin/tags"
+                className="text-blue-600 hover:text-blue-800"
               >
-                {tag.name}
-              </button>
-            ))}
-          </div>
+                标签管理
+              </a>{" "}
+              中创建了标签。
+            </div>
+          )}
+          {formData.tagIds.length > 0 && (
+            <div className="mt-2 text-sm text-gray-600">
+              已选择 {formData.tagIds.length} 个标签：
+              {availableTags
+                .filter((tag) => formData.tagIds.includes(tag.id))
+                .map((tag) => tag.name)
+                .join("、")}
+            </div>
+          )}
         </div>
 
         {/* 内容编辑器 */}
@@ -351,12 +383,14 @@ export default function ArticleForm({
                   remarkPlugins={[remarkGfm]}
                   rehypePlugins={[rehypeRaw]}
                   components={{
+                    // eslint-disable-next-line @typescript-eslint/no-explicit-any
                     code: ({ inline, className, children, ...props }: any) => {
                       const match = /language-(\w+)/.exec(className || "");
                       const language = match ? match[1] : "";
 
                       return !inline ? (
                         <SyntaxHighlighter
+                          // eslint-disable-next-line @typescript-eslint/no-explicit-any
                           style={tomorrow as any}
                           language={language}
                           PreTag="div"

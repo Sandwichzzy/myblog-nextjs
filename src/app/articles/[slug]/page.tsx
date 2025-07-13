@@ -4,11 +4,7 @@ import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
 import { tomorrow } from "react-syntax-highlighter/dist/esm/styles/prism";
 import remarkGfm from "remark-gfm";
 import rehypeRaw from "rehype-raw";
-import {
-  formatDate,
-  formatRelativeTime,
-  calculateReadingTime,
-} from "@/lib/utils";
+import { formatDate, calculateReadingTime } from "@/lib/utils";
 import { getArticleBySlug, incrementViewCount } from "@/lib/articles";
 import {
   BreadcrumbLink,
@@ -137,12 +133,14 @@ export default async function ArticleDetailPage({ params }: PageProps) {
                 rehypePlugins={[rehypeRaw]}
                 components={{
                   // 自定义代码块渲染
+                  // eslint-disable-next-line @typescript-eslint/no-explicit-any
                   code: ({ inline, className, children, ...props }: any) => {
                     const match = /language-(\w+)/.exec(className || "");
                     const language = match ? match[1] : "";
 
                     return !inline ? (
                       <SyntaxHighlighter
+                        // eslint-disable-next-line @typescript-eslint/no-explicit-any
                         style={tomorrow as any}
                         language={language}
                         PreTag="div"
@@ -237,7 +235,7 @@ export default async function ArticleDetailPage({ params }: PageProps) {
         <footer className="border-t border-gray-200 pt-8">
           <div className="flex justify-between items-center">
             <div className="text-sm text-gray-600">
-              最后更新: {formatRelativeTime(article.updated_at)}
+              最后更新: {formatDate(article.updated_at)}
             </div>
             <FooterButtons />
           </div>

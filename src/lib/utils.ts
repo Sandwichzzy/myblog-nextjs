@@ -17,27 +17,27 @@ export function formatDate(date: string | Date): string {
   });
 }
 
-// 格式化相对时间
-export function formatRelativeTime(date: string | Date): string {
-  const dateObj = typeof date === "string" ? new Date(date) : date;
-  const now = new Date();
-  const diffInMs = now.getTime() - dateObj.getTime();
-  const diffInDays = Math.floor(diffInMs / (1000 * 60 * 60 * 24));
+// 格式化相对时间 (暂时未使用，保留以备后用)
+// export function formatRelativeTime(date: string | Date): string {
+//   const dateObj = typeof date === "string" ? new Date(date) : date;
+//   const now = new Date();
+//   const diffInMs = now.getTime() - dateObj.getTime();
+//   const diffInDays = Math.floor(diffInMs / (1000 * 60 * 60 * 24));
 
-  if (diffInDays === 0) {
-    return "今天";
-  } else if (diffInDays === 1) {
-    return "昨天";
-  } else if (diffInDays < 30) {
-    return `${diffInDays}天前`;
-  } else if (diffInDays < 365) {
-    const months = Math.floor(diffInDays / 30);
-    return `${months}个月前`;
-  } else {
-    const years = Math.floor(diffInDays / 365);
-    return `${years}年前`;
-  }
-}
+//   if (diffInDays === 0) {
+//     return "今天";
+//   } else if (diffInDays === 1) {
+//     return "昨天";
+//   } else if (diffInDays < 30) {
+//     return `${diffInDays}天前`;
+//   } else if (diffInDays < 365) {
+//     const months = Math.floor(diffInDays / 30);
+//     return `${months}个月前`;
+//   } else {
+//     const years = Math.floor(diffInDays / 365);
+//     return `${years}年前`;
+//   }
+// }
 
 // 计算阅读时间
 export function calculateReadingTime(content: string): number {
@@ -71,6 +71,7 @@ export function generateRandomColor(): string {
 }
 
 // 防抖函数
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export function debounce<T extends (...args: any[]) => void>(
   func: T,
   delay: number

@@ -8,13 +8,25 @@ export const supabase = createClient<Database>(supabaseUrl, supabaseAnonKey, {
   auth: {
     persistSession: true,
     autoRefreshToken: true,
+    // 设置session过期时间（默认1小时）
+    storageKey: "supabase.auth.token",
+    // 检测session变化
+    detectSessionInUrl: true,
+  },
+  // 全局选项
+  global: {
+    headers: {
+      "X-Client-Info": "blog-app",
+    },
   },
 });
 
 // 服务端专用客户端（具有更高权限）
+const supabaseServiceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+
 export const supabaseAdmin = createClient<Database>(
   supabaseUrl,
-  process.env.SUPABASE_SERVICE_ROLE_KEY!,
+  supabaseServiceRoleKey || supabaseAnonKey,
   {
     auth: {
       autoRefreshToken: false,

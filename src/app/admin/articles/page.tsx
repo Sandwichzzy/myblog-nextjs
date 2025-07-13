@@ -117,13 +117,22 @@ export default async function ArticlesManagePage({ searchParams }: PageProps) {
                         {formatDate(article.created_at)}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm font-medium space-x-2">
-                        <Link
-                          href={`/articles/${article.slug}`}
-                          className="text-blue-600 hover:text-blue-900"
-                          target="_blank"
-                        >
-                          查看
-                        </Link>
+                        {article.published ? (
+                          <Link
+                            href={`/articles/${article.slug}`}
+                            className="text-blue-600 hover:text-blue-900"
+                            target="_blank"
+                          >
+                            查看
+                          </Link>
+                        ) : (
+                          <Link
+                            href={`/admin/articles/${article.slug}/preview`}
+                            className="text-blue-600 hover:text-blue-900"
+                          >
+                            预览
+                          </Link>
+                        )}
                         <Link
                           href={`/admin/articles/${article.slug}/edit`}
                           className="text-green-600 hover:text-green-900"
@@ -131,7 +140,6 @@ export default async function ArticlesManagePage({ searchParams }: PageProps) {
                           编辑
                         </Link>
                         <DeleteArticleButton
-                          articleId={article.id}
                           articleTitle={article.title}
                           slug={article.slug}
                         />

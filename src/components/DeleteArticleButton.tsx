@@ -10,10 +10,9 @@ interface DeleteArticleButtonProps {
 }
 
 export default function DeleteArticleButton({
-  articleId,
   articleTitle,
   slug,
-}: DeleteArticleButtonProps) {
+}: Omit<DeleteArticleButtonProps, "articleId">) {
   const router = useRouter();
   const [isDeleting, setIsDeleting] = useState(false);
 

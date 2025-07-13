@@ -226,13 +226,13 @@ export type CommentQueryParams = z.infer<typeof commentQuerySchema>;
 export type UuidParam = z.infer<typeof uuidParamSchema>;
 export type SlugParam = z.infer<typeof slugParamSchema>;
 export type PaginationParams = z.infer<typeof paginationSchema>;
-export type ApiResponse<T = any> = {
+export type ApiResponse<T = unknown> = {
   success: boolean;
   data?: T;
   error?: string;
   message?: string;
 };
-export type PaginatedResponse<T = any> = {
+export type PaginatedResponse<T = unknown> = {
   success: boolean;
   data: T[];
   pagination: {
@@ -260,7 +260,7 @@ export function validateQuery<T>(
   params: Record<string, string | string[] | undefined>
 ): T {
   // 将URLSearchParams转换为普通对象
-  const processedParams: Record<string, any> = {};
+  const processedParams: Record<string, unknown> = {};
 
   for (const [key, value] of Object.entries(params)) {
     if (value !== undefined) {

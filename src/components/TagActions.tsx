@@ -1,6 +1,5 @@
 "use client";
 
-import { useRouter } from "next/navigation";
 import { useState } from "react";
 
 interface TagActionsProps {
@@ -9,7 +8,7 @@ interface TagActionsProps {
 }
 
 export default function TagActions({ tagId, tagName }: TagActionsProps) {
-  const router = useRouter();
+  // const router = useRouter(); // 保留以备后用
   const [isDeleting, setIsDeleting] = useState(false);
 
   const handleEdit = () => {

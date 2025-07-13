@@ -3,7 +3,6 @@ import {
   withApiHandler,
   withMethodCheck,
   createSuccessResponse,
-  createPaginatedResponse,
   extractQueryParams,
   parseJsonBody,
   withCache,
@@ -18,7 +17,6 @@ import {
   createTagSchema,
 } from "@/lib/validations";
 import {
-  getAllTags,
   getPopularTags,
   searchTags,
   createTag,
@@ -70,12 +68,19 @@ async function handleGetTags(req: NextRequest) {
 
   if (popular) {
     // 获取热门标签（按文章数量排序）
-    tags = await getPopularTags(limit);
+    const popularTags = await getPopularTags(limit);
+    tags = popularTags.map((tag) => ({
+      id: tag.id,
+      name: tag.name,
+      color: tag.color,
+      count: tag.article_count,
+    }));
   } else if (search) {
     // 搜索标签
     const searchResults = await searchTags(search);
     // 为搜索结果添加文章计数（简化版本，设为0）
     tags = searchResults.map((tag) => ({
+      id: tag.id,
       name: tag.name,
       color: tag.color,
       count: 0,
