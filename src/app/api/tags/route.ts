@@ -6,6 +6,7 @@ import {
   extractQueryParams,
   parseJsonBody,
   withCache,
+  withNoCache,
   getClientIP,
   checkRateLimit,
   ApiErrors,
@@ -94,8 +95,16 @@ async function handleGetTags(req: NextRequest) {
   const response = createSuccessResponse(tags, "标签列表获取成功");
 
   // 4. 设置缓存策略
-  // 标签数据相对稳定，缓存15分钟
-  return withCache(response, 900, 1800); // 15分钟缓存，30分钟stale-while-revalidate
+  // 检查是否有nocache参数，支持强制刷新
+  const nocache = searchParams.get("nocache") === "true";
+
+  if (nocache) {
+    // 如果请求不使用缓存，直接返回
+    return withNoCache(response);
+  }
+
+  // 标签数据相对稳定，但考虑到管理操作，缓存时间缩短为2分钟
+  return withCache(response, 120, 300); // 2分钟缓存，5分钟stale-while-revalidate
 }
 
 /**
@@ -150,11 +159,17 @@ async function handleCreateTag(req: NextRequest) {
     color,
   });
 
-  // 6. 记录操作日志
+  // 6. 为新标签添加article_count字段（新标签初始为0）
+  const newTagWithCount = {
+    ...newTag,
+    article_count: 0,
+  };
+
+  // 7. 记录操作日志
   console.log(`标签创建成功: ${newTag.id} - ${newTag.name}`);
 
-  // 7. 返回成功响应
-  return createSuccessResponse(newTag, "标签创建成功", 201);
+  // 8. 返回成功响应
+  return createSuccessResponse(newTagWithCount, "标签创建成功", 201);
 }
 
 // ============================================================================

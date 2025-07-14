@@ -99,6 +99,24 @@ export async function getPopularTags(
     .slice(0, limit);
 }
 
+// 通过ID获取标签
+export async function getTagById(id: string): Promise<Tag | null> {
+  const { data, error } = await supabase
+    .from("tags")
+    .select("*")
+    .eq("id", id)
+    .single();
+
+  if (error) {
+    if (error.code === "PGRST116") {
+      return null; // 标签不存在
+    }
+    throw new Error(`Failed to fetch tag: ${error.message}`);
+  }
+
+  return data;
+}
+
 // 通过名称获取标签
 export async function getTagByName(name: string): Promise<Tag | null> {
   const { data, error } = await supabase

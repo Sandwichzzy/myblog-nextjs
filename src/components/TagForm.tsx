@@ -4,8 +4,13 @@ import { useState, useCallback, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { createTagSchema } from "@/lib/validations";
 import { z } from "zod";
+import { Tag } from "@/types/database";
 
-export default function TagForm() {
+interface TagFormProps {
+  onTagCreate?: (newTag: Tag & { article_count: number }) => void;
+}
+
+export default function TagForm({ onTagCreate }: TagFormProps) {
   const router = useRouter();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isChecking, setIsChecking] = useState(false);
@@ -102,10 +107,11 @@ export default function TagForm() {
       const result = await response.json();
 
       if (result.success) {
+        const newTag = result.data;
+        // 调用回调函数
+        onTagCreate?.(newTag);
         // 重置表单
         setFormData({ name: "", color: "#3B82F6" });
-        // 刷新页面以显示新标签
-        router.refresh();
       } else {
         // 处理不同类型的错误
         let errorMessage = result.message || "未知错误";

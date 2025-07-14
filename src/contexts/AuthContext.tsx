@@ -223,7 +223,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         hasInitialized = true;
         setIsLoading(false);
       }
-    }, 3000); // 减少到3秒
+    }, 10000); // 减少到3秒
 
     // 清理函数
     return () => {

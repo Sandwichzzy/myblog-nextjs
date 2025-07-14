@@ -57,7 +57,15 @@ export default function ArticleForm({
   useEffect(() => {
     const fetchTags = async () => {
       try {
-        const response = await fetch("/api/tags");
+        // 添加强制刷新参数，确保获取最新标签
+        const params = new URLSearchParams({
+          nocache: "true",
+          _t: Date.now().toString(),
+        });
+
+        const response = await fetch(`/api/tags?${params}`, {
+          cache: "no-cache",
+        });
         const result = await response.json();
         if (result.success) {
           setAvailableTags(result.data);

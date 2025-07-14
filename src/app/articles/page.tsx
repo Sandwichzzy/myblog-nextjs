@@ -87,9 +87,17 @@ function ArticlesPageContent() {
   };
 
   // 获取标签数据
-  const fetchTags = async () => {
+  const fetchTags = async (forceRefresh: boolean = false) => {
     try {
-      const response = await fetch("/api/tags");
+      const params = new URLSearchParams();
+      if (forceRefresh) {
+        params.set("nocache", "true");
+        params.set("_t", Date.now().toString());
+      }
+
+      const response = await fetch(`/api/tags?${params}`, {
+        cache: forceRefresh ? "no-cache" : "default",
+      });
       const data = await response.json();
 
       if (data.success) {
@@ -102,8 +110,20 @@ function ArticlesPageContent() {
 
   // 初始化数据
   useEffect(() => {
-    fetchTags();
-  }, []);
+    // 检查是否从管理页面返回或有refresh参数
+    const fromAdmin = document.referrer.includes("/admin");
+    const hasRefresh = searchParams.get("refresh") !== null;
+    const shouldForceRefresh = fromAdmin || hasRefresh;
+
+    fetchTags(shouldForceRefresh);
+
+    if (hasRefresh) {
+      // 清除URL中的refresh参数
+      const url = new URL(window.location.href);
+      url.searchParams.delete("refresh");
+      window.history.replaceState({}, "", url.toString());
+    }
+  }, [searchParams]);
 
   // 当筛选条件改变时重新获取数据
   useEffect(() => {
@@ -128,6 +148,11 @@ function ArticlesPageContent() {
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
+  // 处理标签刷新
+  const handleRefreshTags = () => {
+    fetchTags(true); // 强制刷新标签
+  };
+
   return (
     <div className="min-h-screen bg-gray-50">
       {/* 页面标题 */}
@@ -147,6 +172,7 @@ function ArticlesPageContent() {
           onTagFilter={handleTagFilter}
           selectedTag={selectedTag}
           availableTags={tags}
+          onRefreshTags={handleRefreshTags}
         />
 
         {/* 文章列表 */}

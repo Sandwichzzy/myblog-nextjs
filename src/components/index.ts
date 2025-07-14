@@ -14,6 +14,8 @@ export { default as ArticleForm } from "./ArticleForm";
 export { default as DeleteArticleButton } from "./DeleteArticleButton";
 export { default as TagForm } from "./TagForm";
 export { default as TagActions } from "./TagActions";
+export { default as TagEditModal } from "./TagEditModal";
+export { default as TagManagement } from "./TagManagement";
 
 // 骨架屏组件
 export {
