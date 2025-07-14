@@ -17,8 +17,30 @@ export default async function CommentsManagePage() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* 页面标题 */}
         <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900">评论管理</h1>
-          <p className="mt-2 text-gray-600">审核和管理用户评论</p>
+          <div className="flex items-center justify-between">
+            <div>
+              <h1 className="text-3xl font-bold text-gray-900">
+                评论管理 (API版本)
+              </h1>
+              <p className="mt-2 text-gray-600">审核和管理用户评论</p>
+            </div>
+
+            {/* 版本切换 */}
+            <div className="flex space-x-4">
+              <a
+                href="/admin/comments"
+                className="px-4 py-2 text-sm bg-blue-600 text-white rounded-md"
+              >
+                API版本 (当前)
+              </a>
+              <a
+                href="/admin/comments-server"
+                className="px-4 py-2 text-sm bg-gray-200 text-gray-700 rounded-md hover:bg-gray-300"
+              >
+                切换到Server Actions版本
+              </a>
+            </div>
+          </div>
         </div>
 
         {/* 统计信息 */}

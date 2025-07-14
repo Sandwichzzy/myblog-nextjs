@@ -79,6 +79,16 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     let mounted = true;
     let hasInitialized = false;
+    let initTimeoutId: NodeJS.Timeout;
+
+    // 初始化完成函数
+    const completeInitialization = () => {
+      if (mounted && !hasInitialized) {
+        hasInitialized = true;
+        setIsLoading(false);
+        console.log("认证状态初始化完成");
+      }
+    };
 
     // 监听认证状态变化
     const {
@@ -86,6 +96,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     } = onAuthStateChange(async (authUser) => {
       if (!mounted) return;
 
+      console.log("认证状态变化:", authUser ? "已登录" : "未登录");
       setUser(authUser);
 
       if (authUser) {
@@ -93,6 +104,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           const adminStatus = await isUserAdmin(authUser.id);
           if (mounted) {
             setIsAdmin(adminStatus);
+            console.log("管理员状态:", adminStatus);
           }
         } catch (error) {
           console.error("检查管理员状态失败:", error);
@@ -106,10 +118,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         }
       }
 
-      if (mounted && !hasInitialized) {
-        hasInitialized = true;
-        setIsLoading(false);
-      }
+      // 完成初始化
+      completeInitialization();
     });
 
     // 等待 Supabase 会话恢复的初始化函数
@@ -131,7 +141,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           // 如果是网络错误且重试次数未达到上限，进行重试
           if (retryCount < 2 && sessionError.message.includes("network")) {
             console.log("网络错误，1秒后重试...");
-            setTimeout(() => initializeAuth(retryCount + 1), 1000);
+            setTimeout(() => {
+              if (mounted) initializeAuth(retryCount + 1);
+            }, 1000);
             return;
           }
         }
@@ -142,6 +154,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             expires_at: session.expires_at,
             user_id: session.user.id,
             email: session.user.email,
+            role: session.user.role,
           });
 
           // 如果有会话，获取用户信息
@@ -154,6 +167,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
                 const adminStatus = await isUserAdmin(currentUser.id);
                 if (mounted) {
                   setIsAdmin(adminStatus);
+                  console.log("管理员状态:", adminStatus);
                 }
               } catch (error) {
                 console.error("检查管理员状态失败:", error);
@@ -170,6 +184,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             setIsAdmin(false);
           }
         }
+
+        // 手动初始化完成（如果监听器没有触发）
+        completeInitialization();
       } catch (error) {
         console.error("初始化认证状态失败:", error);
 
@@ -180,7 +197,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           error.message.includes("network")
         ) {
           console.log("网络错误，1秒后重试...");
-          setTimeout(() => initializeAuth(retryCount + 1), 1000);
+          setTimeout(() => {
+            if (mounted) initializeAuth(retryCount + 1);
+          }, 1000);
           return;
         }
 
@@ -188,30 +207,29 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           setUser(null);
           setIsAdmin(false);
         }
-      } finally {
-        if (mounted && !hasInitialized) {
-          hasInitialized = true;
-          setIsLoading(false);
-        }
+
+        // 即使出错也要完成初始化
+        completeInitialization();
       }
     };
 
-    // 立即初始化，不延迟
+    // 立即初始化
     initializeAuth();
 
-    // 如果 5 秒后还没有初始化，强制结束加载状态
-    const fallbackTimeoutId = setTimeout(() => {
+    // 如果 3 秒后还没有初始化，强制结束加载状态
+    initTimeoutId = setTimeout(() => {
       if (!hasInitialized && mounted) {
         console.warn("认证状态初始化超时，强制结束加载状态");
+        console.warn("可能的原因：网络问题、Supabase配置问题或认证服务异常");
         hasInitialized = true;
         setIsLoading(false);
       }
-    }, 5000);
+    }, 3000); // 减少到3秒
 
     // 清理函数
     return () => {
       mounted = false;
-      clearTimeout(fallbackTimeoutId);
+      clearTimeout(initTimeoutId);
       subscription?.unsubscribe();
     };
   }, []);

@@ -135,7 +135,7 @@
 - [x] **评论提交功能**
 
   - [x] 评论表单组件 (CommentForm)
-  - [x] 表单验证和错误处理
+  - [x] 表单验证和错误处理（使用统一的 validations.ts 规则）
   - [x] 支持已登录用户信息自动填入
   - [x] 防垃圾评论机制
   - [x] 用户身份验证和权限控制
@@ -149,17 +149,20 @@
 
 - [x] **管理员评论管理**
 
-  - [x] 评论管理界面 (CommentManagement)
+  - [x] 评论管理界面 (CommentManagement) - API Routes 版本
+  - [x] 评论管理界面 (CommentManagementServer) - Server Actions 版本
   - [x] 待审核评论筛选和展示
   - [x] 单个评论审核(通过/拒绝)
   - [x] 批量评论操作
   - [x] 评论统计信息展示
   - [x] 管理后台导航集成
+  - [x] 混合架构实现（双版本对比）
 
 - [x] **权限管理**
 
   - [x] 管理员权限验证中间件
   - [x] API 路由权限保护
+  - [x] Server Actions 权限保护
   - [x] 用户身份识别和角色检查
   - [x] 未登录用户友好提示
   - [x] 数据库 RLS 策略修复（只允许登录用户评论）
@@ -168,9 +171,46 @@
 - [x] **API 端点扩展**
   - [x] 管理员评论操作 API (`/api/admin/comments/[id]`)
   - [x] 批量评论操作 API (`/api/admin/comments/bulk`)
+  - [x] Server Actions 实现 (`src/lib/actions/comment-actions.ts`)
   - [x] 完善的错误处理和响应格式
 
-### ⏳ 第七阶段：性能优化
+### ✅ 第七阶段：架构优化 - 混合模式
+
+- [x] **架构模式设计**
+
+  - [x] Server Actions vs API Routes 对比分析
+  - [x] 混合架构实现策略
+  - [x] 性能优化方案选择
+  - [x] 开发体验提升
+
+- [x] **Server Actions 实现**
+
+  - [x] 评论管理 Server Actions (`src/lib/actions/comment-actions.ts`)
+  - [x] 服务器端权限验证优化
+  - [x] 自动缓存重新验证
+  - [x] 表单处理优化
+
+- [x] **双版本对比系统**
+
+  - [x] API Routes 版本 (`/admin/comments`)
+  - [x] Server Actions 版本 (`/admin/comments-server`)
+  - [x] 性能对比界面
+  - [x] 版本切换功能
+
+- [x] **开发规范统一**
+
+  - [x] 表单验证规则集中化 (validations.ts)
+  - [x] 所有表单组件统一使用 Zod 验证
+  - [x] 错误处理标准化
+  - [x] 类型安全保障
+
+- [x] **文档和指南**
+  - [x] 架构对比文档 (`docs/server-actions-vs-api-routes.md`)
+  - [x] 最佳实践建议
+  - [x] 选择指南和使用场景
+  - [x] 性能测试结果
+
+### ⏳ 第八阶段：性能优化
 
 - [ ] SEO 优化
 - [ ] ISR 增量静态再生
@@ -226,10 +266,19 @@ comments (
 
 ## 🛠️ 已实现功能
 
+### 混合架构设计
+
+本项目采用**Server Actions + API Routes 混合架构**，根据不同场景选择最优方案：
+
+- **Server Actions**：用于简单 CRUD 操作，性能更优，自动缓存管理
+- **API Routes**：用于复杂交互逻辑，支持外部客户端，RESTful 标准
+- **统一验证**：所有表单使用集中化的 Zod 验证规则
+- **双版本对比**：提供两种实现方式的对比界面
+
 ### API 层架构
 
 - **统一响应格式**：标准化的 JSON API 响应结构
-- **数据验证**：基于 Zod 的严格输入验证
+- **数据验证**：基于 Zod 的严格输入验证（集中化管理）
 - **错误处理**：全面的错误捕获和格式化
 - **缓存策略**：智能缓存配置优化性能
 - **安全防护**：限流、内容清理、XSS 防护

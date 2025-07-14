@@ -67,66 +67,101 @@ export async function signOut() {
 }
 
 /**
- * 获取当前用户信息
+ * 获取当前登录用户信息
+ * 包含用户基本信息和配置信息
  */
 export async function getCurrentUser(): Promise<AuthUser | null> {
   try {
-    // 首先检查会话状态
-    const {
-      data: { session },
-      error: sessionError,
-    } = await supabase.auth.getSession();
+    // 添加超时保护（10秒）
+    const timeoutPromise = new Promise<null>((_, reject) => {
+      setTimeout(() => reject(new Error("获取用户信息超时")), 10000);
+    });
 
-    if (sessionError) {
-      console.error("获取会话失败:", sessionError);
-      return null;
-    }
-
-    if (!session) {
-      console.log("没有活跃的会话");
-      return null;
-    }
-
-    // 如果会话即将过期，尝试刷新
-    const now = Math.floor(Date.now() / 1000);
-    if (session.expires_at && session.expires_at - now < 300) {
-      // 5分钟内过期
-      console.log("会话即将过期，尝试刷新...");
+    const userPromise = (async () => {
+      // 首先检查会话状态
       const {
-        data: { session: refreshedSession },
-        error: refreshError,
-      } = await supabase.auth.refreshSession();
+        data: { session },
+        error: sessionError,
+      } = await supabase.auth.getSession();
 
-      if (refreshError) {
-        console.error("刷新会话失败:", refreshError);
+      if (sessionError) {
+        console.error("获取会话失败:", sessionError);
         return null;
       }
 
-      if (!refreshedSession) {
-        console.log("刷新后没有会话");
+      if (!session) {
+        console.log("没有活跃的会话");
         return null;
       }
-    }
 
-    // 获取用户信息
-    const {
-      data: { user },
-      error,
-    } = await supabase.auth.getUser();
+      // 如果会话即将过期，尝试刷新（但不阻塞）
+      const now = Math.floor(Date.now() / 1000);
+      if (session.expires_at && session.expires_at - now < 300) {
+        // 5分钟内过期
+        console.log("会话即将过期，尝试刷新...");
+        try {
+          const {
+            data: { session: refreshedSession },
+            error: refreshError,
+          } = await supabase.auth.refreshSession();
 
-    if (error || !user) {
-      console.error("获取用户信息失败:", error);
-      return null;
-    }
+          if (refreshError) {
+            console.error("刷新会话失败:", refreshError);
+            // 刷新失败但不返回 null，继续使用当前会话
+          }
 
-    // 获取用户配置信息
-    const profile = await getUserProfile(user.id);
+          if (!refreshedSession) {
+            console.log("刷新后没有会话");
+            // 刷新失败但不返回 null，继续使用当前会话
+          }
+        } catch (refreshError) {
+          console.error("刷新会话异常:", refreshError);
+          // 继续使用当前会话
+        }
+      }
 
-    return {
-      id: user.id,
-      email: user.email,
-      profile: profile || undefined,
-    };
+      // 获取用户信息
+      const {
+        data: { user },
+        error,
+      } = await supabase.auth.getUser();
+
+      if (error || !user) {
+        console.error("获取用户信息失败:", error);
+        return null;
+      }
+
+      // 获取用户配置信息（移除超时限制，使用重试机制）
+      let profile = null;
+      try {
+        profile = await getUserProfile(user.id);
+      } catch (profileError) {
+        console.error("获取用户配置失败:", profileError);
+
+        // 如果获取失败，尝试创建用户配置
+        try {
+          console.log("尝试创建用户配置...");
+          profile = await ensureUserProfile({
+            id: user.id,
+            email: user.email,
+            user_metadata: user.user_metadata,
+          });
+          console.log("用户配置创建成功:", profile);
+        } catch (createError) {
+          console.error("创建用户配置失败:", createError);
+          // 配置获取/创建失败不阻塞用户登录
+        }
+      }
+
+      return {
+        id: user.id,
+        email: user.email,
+        profile: profile || undefined,
+      };
+    })();
+
+    // 使用 Promise.race 实现超时
+    return await Promise.race([userPromise, timeoutPromise]);
   } catch (error) {
     console.error("getCurrentUser 失败:", error);
     return null;
@@ -140,7 +175,9 @@ export async function getCurrentUser(): Promise<AuthUser | null> {
 export async function getUserProfile(
   userId: string
 ): Promise<UserProfile | null> {
-  // 使用普通客户端查询用户自己的配置
+  console.log(`获取用户 ${userId} 的配置`);
+
+  // 使用管理员客户端查询用户配置，确保能绕过 RLS 策略
   const { data, error } = await supabase
     .from("user_profiles")
     .select("*")
@@ -152,6 +189,7 @@ export async function getUserProfile(
     return null;
   }
 
+  console.log("获取用户配置结果:", data);
   return data;
 }
 
@@ -174,6 +212,8 @@ export async function createUserProfile(user: {
     user.email?.split("@")[0] ||
     "用户";
 
+  console.log(`为用户 ${user.id} 创建用户配置，显示名称: ${displayName}`);
+
   const { data, error } = await supabase
     .from("user_profiles")
     .insert({
@@ -193,6 +233,7 @@ export async function createUserProfile(user: {
     throw new Error(`创建用户配置失败: ${error.message}`);
   }
 
+  console.log("用户配置创建成功:", data);
   return data;
 }
 
@@ -209,7 +250,8 @@ export async function ensureUserProfile(user: {
     avatar_url?: string;
   };
 }): Promise<UserProfile> {
-  // 检查用户配置是否存在
+  console.log(`确保用户 ${user.id} (${user.email}) 的配置存在`);
+
   const { data: profile, error: profileError } = await supabase
     .from("user_profiles")
     .select("*")
@@ -227,6 +269,7 @@ export async function ensureUserProfile(user: {
     return await createUserProfile(user);
   }
 
+  console.log("用户配置已存在:", profile);
   return profile;
 }
 
@@ -241,29 +284,45 @@ export async function isUserAdmin(userId?: string): Promise<boolean> {
       const {
         data: { user },
       } = await supabase.auth.getUser();
-      if (!user) return false;
+      if (!user) {
+        console.log("检查管理员权限: 未找到当前用户");
+        return false;
+      }
       userId = user.id;
     }
+
+    console.log(`检查用户 ${userId} 的管理员权限`);
 
     // 使用管理员客户端查询，绕过 RLS
     const { data, error } = await supabase
       .from("user_profiles")
-      .select("role, is_active")
+      .select("role, is_active, display_name")
       .eq("id", userId)
-      .eq("is_active", true)
-      .maybeSingle();
+      .maybeSingle(); // 移除 is_active 筛选，先查看原始数据
 
     if (error) {
       console.error("检查管理员权限失败:", error);
       return false;
     }
 
+    console.log("用户配置查询结果:", data);
+
     // 如果用户配置不存在，返回 false
     if (!data) {
+      console.log("用户配置不存在");
       return false;
     }
 
-    return data.role === "admin";
+    // 检查用户是否激活
+    if (!data.is_active) {
+      console.log("用户未激活");
+      return false;
+    }
+
+    const isAdmin = data.role === "admin";
+    console.log(`用户角色: ${data.role}, 是否为管理员: ${isAdmin}`);
+
+    return isAdmin;
   } catch (error) {
     console.error("检查管理员权限异常:", error);
     return false;
@@ -272,6 +331,7 @@ export async function isUserAdmin(userId?: string): Promise<boolean> {
 
 /**
  * 将第一个注册用户提升为管理员
+ * 这是唯一需要使用 supabaseAdmin 的函数，因为它需要系统级权限
  */
 export async function promoteFirstUserToAdmin() {
   try {

@@ -3,6 +3,8 @@
 import { useState } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/lib/supabase";
+import { createCommentSchema } from "@/lib/validations";
+import { z } from "zod";
 
 interface CommentFormProps {
   articleId: string;
@@ -24,6 +26,40 @@ export default function CommentForm({
     type: "success" | "error";
     text: string;
   } | null>(null);
+  const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
+
+  // 使用 Zod 验证表单
+  const validateForm = () => {
+    try {
+      createCommentSchema.parse({
+        articleId,
+        authorName: formData.authorName,
+        authorEmail: formData.authorEmail || null,
+        content: formData.content,
+      });
+      setMessage(null);
+      setFieldErrors({});
+      return true;
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        // 收集所有字段错误
+        const errors: Record<string, string> = {};
+        error.errors.forEach((err) => {
+          if (err.path.length > 0) {
+            errors[err.path[0] as string] = err.message;
+          }
+        });
+        setFieldErrors(errors);
+
+        // 设置第一个错误作为主要错误消息
+        const firstError = error.errors[0];
+        setMessage({ type: "error", text: firstError.message });
+      } else {
+        setMessage({ type: "error", text: "表单验证失败" });
+      }
+      return false;
+    }
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -34,13 +70,8 @@ export default function CommentForm({
       return;
     }
 
-    if (!formData.content.trim()) {
-      setMessage({ type: "error", text: "请输入评论内容" });
-      return;
-    }
-
-    if (!formData.authorName.trim()) {
-      setMessage({ type: "error", text: "请输入您的姓名" });
+    // 使用 Zod 验证表单
+    if (!validateForm()) {
       return;
     }
 
@@ -111,6 +142,15 @@ export default function CommentForm({
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
 
+    // 清除该字段的错误状态
+    if (fieldErrors[name]) {
+      setFieldErrors((prev) => {
+        const newErrors = { ...prev };
+        delete newErrors[name];
+        return newErrors;
+      });
+    }
+
     // 清除错误消息
     if (message?.type === "error") {
       setMessage(null);
@@ -168,9 +208,18 @@ export default function CommentForm({
               onChange={handleInputChange}
               required
               disabled={isSubmitting}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 disabled:bg-gray-50 disabled:text-gray-500"
+              className={`w-full px-3 py-2 border rounded-md shadow-sm focus:ring-2 focus:border-transparent disabled:bg-gray-50 disabled:text-gray-500 ${
+                fieldErrors.authorName
+                  ? "border-red-300 focus:ring-red-500"
+                  : "border-gray-300 focus:ring-blue-500 focus:border-blue-500"
+              }`}
               placeholder="您的姓名"
             />
+            {fieldErrors.authorName && (
+              <p className="mt-1 text-sm text-red-600">
+                {fieldErrors.authorName}
+              </p>
+            )}
           </div>
 
           <div>
@@ -190,9 +239,18 @@ export default function CommentForm({
               value={formData.authorEmail}
               onChange={handleInputChange}
               disabled={isSubmitting}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 disabled:bg-gray-50 disabled:text-gray-500"
+              className={`w-full px-3 py-2 border rounded-md shadow-sm focus:ring-2 focus:border-transparent disabled:bg-gray-50 disabled:text-gray-500 ${
+                fieldErrors.authorEmail
+                  ? "border-red-300 focus:ring-red-500"
+                  : "border-gray-300 focus:ring-blue-500 focus:border-blue-500"
+              }`}
               placeholder="您的邮箱"
             />
+            {fieldErrors.authorEmail && (
+              <p className="mt-1 text-sm text-red-600">
+                {fieldErrors.authorEmail}
+              </p>
+            )}
           </div>
         </div>
 
@@ -212,12 +270,20 @@ export default function CommentForm({
             required
             disabled={isSubmitting}
             rows={4}
-            className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 disabled:bg-gray-50 disabled:text-gray-500"
+            className={`w-full px-3 py-2 border rounded-md shadow-sm focus:ring-2 focus:border-transparent disabled:bg-gray-50 disabled:text-gray-500 ${
+              fieldErrors.content
+                ? "border-red-300 focus:ring-red-500"
+                : "border-gray-300 focus:ring-blue-500 focus:border-blue-500"
+            }`}
             placeholder="写下您的想法..."
           />
-          <p className="mt-1 text-xs text-gray-500">
-            请遵守相关法律法规，文明发言。评论将在审核后显示。
-          </p>
+          {fieldErrors.content ? (
+            <p className="mt-1 text-sm text-red-600">{fieldErrors.content}</p>
+          ) : (
+            <p className="mt-1 text-xs text-gray-500">
+              请遵守相关法律法规，文明发言。评论将在审核后显示。
+            </p>
+          )}
         </div>
 
         {/* 提交按钮 */}
@@ -228,7 +294,8 @@ export default function CommentForm({
               !user ||
               isSubmitting ||
               !formData.content.trim() ||
-              !formData.authorName.trim()
+              !formData.authorName.trim() ||
+              Object.keys(fieldErrors).length > 0
             }
             className="inline-flex items-center px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed"
           >

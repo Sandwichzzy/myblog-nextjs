@@ -218,7 +218,31 @@ export default async function AdminDashboard() {
                     d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"
                   />
                 </svg>
-                <span className="text-gray-700 font-medium">管理评论</span>
+                <span className="text-gray-700 font-medium">
+                  管理评论 (API版本)
+                </span>
+              </Link>
+
+              <Link
+                href="/admin/comments-server"
+                className="flex items-center w-full px-4 py-3 text-left bg-green-50 hover:bg-green-100 rounded-lg transition-colors"
+              >
+                <svg
+                  className="w-5 h-5 text-green-600 mr-3"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M13 10V3L4 14h7v7l9-11h-7z"
+                  />
+                </svg>
+                <span className="text-green-700 font-medium">
+                  管理评论 (Server Actions) 🚀
+                </span>
               </Link>
             </div>
           </div>

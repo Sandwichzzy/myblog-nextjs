@@ -192,6 +192,105 @@ export async function bulkModerateComments(
   }
 }
 
+// 获取所有评论（管理员功能）
+export async function getAllComments(
+  page: number = 1,
+  limit: number = 20
+): Promise<{
+  comments: (Comment & { article_title?: string })[];
+  totalCount: number;
+  totalPages: number;
+  currentPage: number;
+}> {
+  const from = (page - 1) * limit;
+  const to = from + limit - 1;
+
+  const { data, error, count } = await supabaseAdmin
+    .from("comments")
+    .select(
+      `
+      *,
+      article:articles(title)
+    `,
+      { count: "exact" }
+    )
+    .order("created_at", { ascending: false })
+    .range(from, to);
+
+  if (error) {
+    throw new Error(`Failed to fetch all comments: ${error.message}`);
+  }
+
+  return {
+    comments: (data || []).map(
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      (comment: any) => ({
+        ...comment,
+        article_title: comment.article?.title,
+      })
+    ),
+    totalCount: count || 0,
+    totalPages: Math.ceil((count || 0) / limit),
+    currentPage: page,
+  };
+}
+
+// 获取所有已发布评论（管理员功能）
+export async function getAllPublishedComments(
+  page: number = 1,
+  limit: number = 20
+): Promise<{
+  comments: (Comment & { article_title?: string })[];
+  totalCount: number;
+  totalPages: number;
+  currentPage: number;
+}> {
+  const from = (page - 1) * limit;
+  const to = from + limit - 1;
+
+  console.log("getAllPublishedComments: 查询已发布评论 (published = true)");
+
+  const { data, error, count } = await supabaseAdmin
+    .from("comments")
+    .select(
+      `
+      *,
+      article:articles(title)
+    `,
+      { count: "exact" }
+    )
+    .eq("published", true)
+    .order("created_at", { ascending: false })
+    .range(from, to);
+
+  if (error) {
+    console.error("getAllPublishedComments 查询失败:", error);
+    throw new Error(`Failed to fetch published comments: ${error.message}`);
+  }
+
+  console.log(
+    `getAllPublishedComments 原始数据:`,
+    data?.map((d) => ({
+      id: d.id,
+      content: d.content?.substring(0, 50) + "...",
+      published: d.published,
+    }))
+  );
+
+  return {
+    comments: (data || []).map(
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      (comment: any) => ({
+        ...comment,
+        article_title: comment.article?.title,
+      })
+    ),
+    totalCount: count || 0,
+    totalPages: Math.ceil((count || 0) / limit),
+    currentPage: page,
+  };
+}
+
 // 获取最新评论（管理员功能）
 export async function getRecentComments(
   limit: number = 10

@@ -22,6 +22,8 @@ import {
 import {
   getArticleComments,
   getPendingComments,
+  getAllComments,
+  getAllPublishedComments,
   createComment,
 } from "@/lib/comments";
 import { supabase, supabaseAdmin } from "@/lib/supabase";
@@ -42,13 +44,51 @@ async function handleGetComments(req: NextRequest) {
   const queryParams = extractQueryParams(req);
   const validatedParams = validateQuery(commentQuerySchema, queryParams);
 
-  const { page = 1, limit = 20, articleId, published } = validatedParams;
+  const {
+    page = 1,
+    limit = 20,
+    articleId,
+    published: publishedString,
+  } = validatedParams;
 
-  // 2. 检查是否有管理员权限（如果查询未发布评论）
-  if (published === false) {
-    // TODO: 在实际项目中需要验证管理员权限
-    // const user = await verifyAdminAuth(req)
-    // if (!user) throw ApiErrors.unauthorized('需要管理员权限')
+  // 手动转换 published 字符串为布尔值
+  let published: boolean | undefined;
+  if (publishedString === "true") {
+    published = true;
+  } else if (publishedString === "false") {
+    published = false;
+  } else if (publishedString === undefined) {
+    published = undefined;
+  } else {
+    throw ApiErrors.badRequest(`Invalid published value: ${publishedString}`);
+  }
+
+  // 2. 检查是否需要管理员权限
+  if (published === false || published === true || published === undefined) {
+    // 这些都是管理员功能，需要验证权限
+    const authHeader = req.headers.get("authorization");
+    if (!authHeader) {
+      throw ApiErrors.unauthorized("管理员功能需要登录");
+    }
+
+    // 验证用户身份（基本验证，更严格的验证可以检查管理员角色）
+    try {
+      const {
+        data: { user },
+        error,
+      } = await supabaseAdmin.auth.getUser(authHeader.replace("Bearer ", ""));
+
+      if (error || !user) {
+        throw ApiErrors.unauthorized("用户身份验证失败");
+      }
+
+      // TODO: 这里可以添加更严格的管理员角色检查
+      // const isAdmin = await isUserAdmin(user.id);
+      // if (!isAdmin) throw ApiErrors.forbidden('需要管理员权限');
+    } catch (authError) {
+      console.error("权限验证失败:", authError);
+      throw ApiErrors.unauthorized("权限验证失败");
+    }
   }
 
   // 3. 根据查询条件选择合适的函数
@@ -60,8 +100,14 @@ async function handleGetComments(req: NextRequest) {
   } else if (published === false) {
     // 获取待审核评论（管理员功能）
     result = await getPendingComments(page, limit);
+  } else if (published === true) {
+    // 获取所有已发布评论（管理员功能）
+    result = await getAllPublishedComments(page, limit);
+  } else if (published === undefined) {
+    // 获取所有评论（管理员功能）
+    result = await getAllComments(page, limit);
   } else {
-    // 公开API默认返回空，因为没有获取所有已发布评论的函数
+    // 默认情况
     result = {
       comments: [],
       totalCount: 0,

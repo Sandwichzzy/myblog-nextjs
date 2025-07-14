@@ -247,6 +247,7 @@ CREATE POLICY "Everyone can read article tags" ON article_tags
 -- ----------------------------------------------------------------------------
 -- 策略：普通用户只能查看已发布（已审核）的评论
 -- 待审核的评论对公众不可见，防止垃圾评论显示
+-- 不支持匿名用户评论
 CREATE POLICY "Everyone can read published comments" ON comments
   FOR SELECT USING (published = true);
 

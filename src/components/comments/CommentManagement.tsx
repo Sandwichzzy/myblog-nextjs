@@ -32,18 +32,47 @@ export default function CommentManagement({
   const fetchComments = async () => {
     setLoading(true);
     try {
-      const url =
-        filter === "pending"
-          ? "/api/comments?published=false&limit=50"
-          : "/api/comments?limit=50";
+      let url = "/api/comments?limit=50";
 
-      const response = await fetch(url);
-      if (!response.ok) throw new Error("获取评论失败");
+      // 根据筛选条件构建 URL
+      if (filter === "pending") {
+        url += "&published=false";
+      } else if (filter === "published") {
+        url += "&published=true";
+      }
+      // filter === "all" 时不需要添加 published 参数，会获取所有评论
+
+      console.log(`获取评论: ${filter}, URL: ${url}`);
+
+      // 获取认证令牌（管理员功能需要）
+      const {
+        data: { session },
+      } = await supabase.auth.getSession();
+
+      const headers: HeadersInit = {
+        "Content-Type": "application/json",
+      };
+
+      if (session?.access_token) {
+        headers.Authorization = `Bearer ${session.access_token}`;
+      }
+
+      const response = await fetch(url, { headers });
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(
+          errorData.message || `HTTP ${response.status}: 获取评论失败`
+        );
+      }
 
       const data = await response.json();
+      console.log(`获取到 ${data.data.length} 条评论`);
       setComments(data.data);
     } catch (error) {
       console.error("获取评论失败:", error);
+      alert(
+        `获取评论失败: ${error instanceof Error ? error.message : "未知错误"}`
+      );
     } finally {
       setLoading(false);
     }
@@ -54,6 +83,11 @@ export default function CommentManagement({
     if (initialComments.length === 0) {
       fetchComments();
     }
+  }, []);
+
+  // 筛选器变化时重新获取
+  useEffect(() => {
+    fetchComments();
   }, [filter]);
 
   // 审核单个评论

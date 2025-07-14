@@ -39,22 +39,6 @@ export default function Footer() {
                   文章列表
                 </Link>
               </li>
-              <li>
-                <Link
-                  href="/tags"
-                  className="text-gray-600 hover:text-blue-600 text-sm transition-colors"
-                >
-                  标签云
-                </Link>
-              </li>
-              <li>
-                <Link
-                  href="/about"
-                  className="text-gray-600 hover:text-blue-600 text-sm transition-colors"
-                >
-                  关于我
-                </Link>
-              </li>
             </ul>
           </div>
 

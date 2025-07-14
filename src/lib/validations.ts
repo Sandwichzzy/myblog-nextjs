@@ -148,7 +148,7 @@ export const commentQuerySchema = z.object({
   limit: z.coerce.number().int().min(1).max(100).optional().default(20),
 
   // 发布状态筛选：可选，用于管理后台
-  published: z.coerce.boolean().optional(),
+  published: z.string().optional(),
 
   // 文章ID筛选：可选，获取特定文章的评论
   articleId: z.string().uuid().optional(),
