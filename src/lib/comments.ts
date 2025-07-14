@@ -39,7 +39,9 @@ export async function getArticleComments(
 export async function createComment(
   commentData: CommentInsert
 ): Promise<Comment> {
-  const { data, error } = await supabase
+  // 使用 supabaseAdmin 客户端绕过 RLS 策略
+  // 在服务器端，普通的 supabase 客户端无法正确处理 RLS 策略
+  const { data, error } = await supabaseAdmin
     .from("comments")
     .insert({
       ...commentData,

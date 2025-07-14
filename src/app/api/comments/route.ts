@@ -24,6 +24,7 @@ import {
   getPendingComments,
   createComment,
 } from "@/lib/comments";
+import { supabase, supabaseAdmin } from "@/lib/supabase";
 
 // ============================================================================
 // 评论 API 路由处理器
@@ -94,24 +95,41 @@ async function handleGetComments(req: NextRequest) {
  * POST /api/comments - 创建新评论
  */
 async function handleCreateComment(req: NextRequest) {
-  // 1. 严格限流检查（防止垃圾评论）
+  // 1. 检查用户身份验证
+  const authHeader = req.headers.get("authorization");
+  if (!authHeader) {
+    throw ApiErrors.unauthorized("需要登录才能发表评论");
+  }
+
+  // 验证用户身份（使用 supabaseAdmin 客户端）
+  const {
+    data: { user },
+    error: authError,
+  } = await supabaseAdmin.auth.getUser(authHeader.replace("Bearer ", ""));
+
+  if (authError || !user) {
+    console.error("用户身份验证失败:", authError);
+    throw ApiErrors.unauthorized("用户身份验证失败");
+  }
+
+  // 2. 严格限流检查（防止垃圾评论）
   const clientIP = getClientIP(req);
   if (checkRateLimit(`create-comment-${clientIP}`, 5, 300000)) {
     // 每5分钟最多5条评论
     throw ApiErrors.tooManyRequests("评论提交过于频繁，请稍后再试");
   }
 
-  // 2. 解析和验证请求体
+  // 3. 解析和验证请求体
   const body = await parseJsonBody(req);
   const validatedData = validateBody(createCommentSchema, body);
 
   const { articleId, authorName, authorEmail, content } = validatedData;
 
-  // 3. 内容安全检查和清理
+  // 4. 内容安全检查和清理
   const sanitizedContent = sanitizeContent(content);
   const sanitizedAuthorName = sanitizeContent(authorName);
 
-  // 4. 基础内容过滤（简单的垃圾内容检测）
+  // 5. 基础内容过滤（简单的垃圾内容检测）
   if (content.length < 2) {
     throw ApiErrors.badRequest("评论内容过短");
   }
@@ -122,21 +140,24 @@ async function handleCreateComment(req: NextRequest) {
     throw ApiErrors.badRequest("评论中包含过多链接");
   }
 
-  // 5. 创建评论（使用数据库字段格式）
+  // 6. 创建评论（使用数据库字段格式）
   const commentData = {
     article_id: articleId,
     author_name: sanitizedAuthorName,
     author_email: authorEmail || null,
     content: sanitizedContent,
     published: false, // 新评论默认需要审核
+    user_id: user.id, // 关联用户身份
   };
 
   const newComment = await createComment(commentData);
 
-  // 6. 记录操作日志
-  console.log(`评论创建成功: ${newComment.id} - ${authorName} on ${articleId}`);
+  // 7. 记录操作日志
+  console.log(
+    `评论创建成功: ${newComment.id} - ${authorName} (${user.email}) on ${articleId}`
+  );
 
-  // 7. 返回成功响应（转换字段名为前端格式）
+  // 8. 返回成功响应（转换字段名为前端格式）
   return createSuccessResponse(
     {
       id: newComment.id,
@@ -145,6 +166,7 @@ async function handleCreateComment(req: NextRequest) {
       authorEmail: newComment.author_email,
       content: newComment.content,
       published: newComment.published,
+      userId: newComment.user_id,
       created_at: newComment.created_at,
     },
     "评论已提交，等待管理员审核后显示",

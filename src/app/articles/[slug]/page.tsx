@@ -6,6 +6,8 @@ import remarkGfm from "remark-gfm";
 import rehypeRaw from "rehype-raw";
 import { formatDate, calculateReadingTime } from "@/lib/utils";
 import { getArticleBySlug, incrementViewCount } from "@/lib/articles";
+import { getArticleComments } from "@/lib/comments";
+import { ArticleComments } from "@/components";
 import {
   BreadcrumbLink,
   TagButton,
@@ -25,6 +27,10 @@ export default async function ArticleDetailPage({ params }: PageProps) {
   if (!article) {
     notFound();
   }
+
+  // 获取文章评论（服务端渲染）
+  const commentsResult = await getArticleComments(article.id, 1, 10);
+  const initialComments = commentsResult.comments;
 
   // 异步增加浏览量（不阻塞渲染）
   incrementViewCount(article.id).catch((error) => {
@@ -232,7 +238,7 @@ export default async function ArticleDetailPage({ params }: PageProps) {
         </div>
 
         {/* 文章底部信息 */}
-        <footer className="border-t border-gray-200 pt-8">
+        <footer className="border-t border-gray-200 pt-8 mb-12">
           <div className="flex justify-between items-center">
             <div className="text-sm text-gray-600">
               最后更新: {formatDate(article.updated_at)}
@@ -240,6 +246,14 @@ export default async function ArticleDetailPage({ params }: PageProps) {
             <FooterButtons />
           </div>
         </footer>
+
+        {/* 评论区域 */}
+        <section className="border-t border-gray-200 pt-12">
+          <ArticleComments
+            articleId={article.id}
+            initialComments={initialComments}
+          />
+        </section>
       </article>
     </div>
   );

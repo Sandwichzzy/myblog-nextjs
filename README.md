@@ -123,18 +123,60 @@
   - [x] 数据库级权限控制 (RLS 策略)
   - [x] API 路由权限验证准备
 
-### ⏳ 第六阶段：状态管理与数据获取
+### ✅ 第六阶段：评论系统界面
 
-- [ ] SWR 集成和配置
-- [ ] 数据获取 hooks
-- [ ] 错误处理和加载状态
+- [x] **评论显示功能**
 
-### ⏳ 第六阶段：性能优化
+  - [x] 评论列表组件 (CommentList)
+  - [x] 分页加载和无限滚动
+  - [x] 评论状态管理和实时更新
+  - [x] 用户友好的空状态处理
+
+- [x] **评论提交功能**
+
+  - [x] 评论表单组件 (CommentForm)
+  - [x] 表单验证和错误处理
+  - [x] 支持已登录用户信息自动填入
+  - [x] 防垃圾评论机制
+  - [x] 用户身份验证和权限控制
+  - [x] 只允许登录用户发表评论
+
+- [x] **文章评论集成**
+
+  - [x] 文章详情页评论区域 (ArticleComments)
+  - [x] 服务端渲染初始评论数据
+  - [x] 评论提交后自动刷新列表
+
+- [x] **管理员评论管理**
+
+  - [x] 评论管理界面 (CommentManagement)
+  - [x] 待审核评论筛选和展示
+  - [x] 单个评论审核(通过/拒绝)
+  - [x] 批量评论操作
+  - [x] 评论统计信息展示
+  - [x] 管理后台导航集成
+
+- [x] **权限管理**
+
+  - [x] 管理员权限验证中间件
+  - [x] API 路由权限保护
+  - [x] 用户身份识别和角色检查
+  - [x] 未登录用户友好提示
+  - [x] 数据库 RLS 策略修复（只允许登录用户评论）
+  - [x] 评论用户身份关联和验证
+
+- [x] **API 端点扩展**
+  - [x] 管理员评论操作 API (`/api/admin/comments/[id]`)
+  - [x] 批量评论操作 API (`/api/admin/comments/bulk`)
+  - [x] 完善的错误处理和响应格式
+
+### ⏳ 第七阶段：性能优化
 
 - [ ] SEO 优化
 - [ ] ISR 增量静态再生
 - [ ] 图片优化
 - [ ] 代码分割
+- [ ] SWR 集成和数据缓存
 
 ## 🗄️ 数据库结构
 
@@ -292,6 +334,7 @@ comments (
   - 批量操作（支持批量管理文章）
   - 表单验证（完整的客户端验证）
   - 错误处理（友好的错误提示）
+  - 加载状态优化（骨架屏和加载指示器）
 
 ## 🔧 环境配置
 
@@ -314,6 +357,12 @@ comments (
 
    -- 用户认证扩展
    \i database/auth-extension.sql
+
+   -- 修复 RLS 递归问题
+   \i database/fix-rls-recursion.sql
+
+   -- 修复评论系统用户身份验证
+   \i database/fix-comment-user-auth.sql
    ```
 
 3. **OAuth 提供商配置**
@@ -338,6 +387,7 @@ comments (
    ```
 
 5. **管理员账户设置**
+
    - 第一个注册的用户会自动成为管理员
    - 或在数据库中手动设置：`UPDATE user_profiles SET role = 'admin' WHERE id = 'user-uuid'`
 
@@ -354,21 +404,36 @@ my-blog/
 │   │   │   │       └── route.ts  # 文章详情API
 │   │   │   ├── tags/
 │   │   │   │   └── route.ts      # 标签API
-│   │   │   └── comments/
-│   │   │       └── route.ts      # 评论API
+│   │   │   ├── comments/
+│   │   │   │   └── route.ts      # 评论API
+│   │   │   └── admin/            # 管理员专用API
+│   │   │       └── comments/
+│   │   │           ├── [id]/
+│   │   │           │   └── route.ts # 单个评论操作API
+│   │   │           └── bulk/
+│   │   │               └── route.ts # 批量评论操作API
 │   │   ├── admin/               # 管理后台
 │   │   │   ├── articles/
 │   │   │   │   ├── new/
+│   │   │   │   │   ├── loading.tsx # 新建文章加载页
 │   │   │   │   │   └── page.tsx  # 文章创建页
 │   │   │   │   ├── [slug]/
 │   │   │   │   │   ├── edit/
+│   │   │   │   │   │   ├── loading.tsx # 编辑加载页
 │   │   │   │   │   │   └── page.tsx  # 文章编辑页
 │   │   │   │   │   └── preview/
+│   │   │   │   │       ├── loading.tsx # 预览加载页
 │   │   │   │   │       └── page.tsx  # 文章预览页
+│   │   │   │   ├── loading.tsx   # 文章列表加载页
 │   │   │   │   └── page.tsx      # 文章管理页
 │   │   │   ├── tags/
+│   │   │   │   ├── loading.tsx   # 标签管理加载页
 │   │   │   │   └── page.tsx      # 标签管理页
+│   │   │   ├── comments/         # 评论管理
+│   │   │   │   ├── loading.tsx   # 评论管理加载页
+│   │   │   │   └── page.tsx      # 评论管理页
 │   │   │   ├── layout.tsx        # 管理后台布局（权限保护）
+│   │   │   ├── loading.tsx       # 管理后台首页加载页
 │   │   │   └── page.tsx          # 管理后台首页
 │   │   ├── auth/                # 认证相关页面
 │   │   │   ├── login/
@@ -394,6 +459,18 @@ my-blog/
 │   │   ├── DeleteArticleButton.tsx # 删除文章按钮
 │   │   ├── TagForm.tsx           # 标签表单组件
 │   │   ├── TagActions.tsx        # 标签操作组件
+│   │   ├── comments/             # 评论系统组件
+│   │   │   ├── CommentList.tsx   # 评论列表组件
+│   │   │   ├── CommentForm.tsx   # 评论表单组件
+│   │   │   ├── ArticleComments.tsx # 文章评论组合组件
+│   │   │   ├── CommentManagement.tsx # 管理员评论管理组件
+│   │   │   └── index.ts          # 评论组件导出
+│   │   ├── skeletons/            # 加载骨架屏组件
+│   │   │   ├── AdminPageSkeleton.tsx
+│   │   │   ├── TableSkeleton.tsx
+│   │   │   ├── ArticleFormSkeleton.tsx
+│   │   │   ├── ArticlePreviewSkeleton.tsx
+│   │   │   └── index.ts
 │   │   └── index.ts              # 组件导出
 │   ├── lib/          # 工具函数和数据访问层
 │   │   ├── supabase.ts      # Supabase 客户端配置
