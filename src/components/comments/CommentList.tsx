@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { Comment } from "@/types/database";
 import { formatDate } from "@/lib/utils";
 import { LoadingSpinner } from "@/components";
@@ -21,40 +21,40 @@ export default function CommentList({
   const [totalCount, setTotalCount] = useState(0);
 
   // 获取评论
-  const fetchComments = async (
-    pageNum: number = 1,
-    append: boolean = false
-  ) => {
-    setLoading(true);
-    try {
-      const response = await fetch(
-        `/api/comments?articleId=${articleId}&page=${pageNum}&limit=10`
-      );
-      if (!response.ok) throw new Error("获取评论失败");
+  const fetchComments = useCallback(
+    async (pageNum: number = 1, append: boolean = false) => {
+      setLoading(true);
+      try {
+        const response = await fetch(
+          `/api/comments?articleId=${articleId}&page=${pageNum}&limit=10`
+        );
+        if (!response.ok) throw new Error("获取评论失败");
 
-      const data = await response.json();
+        const data = await response.json();
 
-      if (append) {
-        setComments((prev) => [...prev, ...data.data]);
-      } else {
-        setComments(data.data);
+        if (append) {
+          setComments((prev) => [...prev, ...data.data]);
+        } else {
+          setComments(data.data);
+        }
+
+        setTotalCount(data.pagination.totalCount);
+        setHasMore(data.pagination.page < data.pagination.totalPages);
+      } catch (error) {
+        console.error("获取评论失败:", error);
+      } finally {
+        setLoading(false);
       }
-
-      setTotalCount(data.pagination.totalCount);
-      setHasMore(data.pagination.page < data.pagination.totalPages);
-    } catch (error) {
-      console.error("获取评论失败:", error);
-    } finally {
-      setLoading(false);
-    }
-  };
+    },
+    [articleId]
+  );
 
   // 初始化时如果没有初始评论就获取
   useEffect(() => {
     if (initialComments.length === 0) {
       fetchComments(1);
     }
-  }, [articleId]);
+  }, [fetchComments, initialComments.length]);
 
   // 加载更多评论
   const loadMore = () => {

@@ -26,7 +26,7 @@ import {
   getAllPublishedComments,
   createComment,
 } from "@/lib/comments";
-import { supabase, supabaseAdmin } from "@/lib/supabase";
+import { supabaseAdmin } from "@/lib/supabase";
 
 // ============================================================================
 // 评论 API 路由处理器

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import { Comment } from "@/types/database";
 import { formatDate } from "@/lib/utils";
@@ -34,28 +34,8 @@ export default function CommentManagementServer({
   const [loading, setLoading] = useState(true);
   const [selectedComments, setSelectedComments] = useState<string[]>([]);
 
-  // 检查管理员权限
-  if (!user || !isAdmin) {
-    return (
-      <div className="max-w-2xl mx-auto text-center py-12">
-        <div className="bg-red-50 border border-red-200 rounded-lg p-8">
-          <h2 className="text-xl font-semibold text-red-900 mb-2">
-            访问被拒绝
-          </h2>
-          <p className="text-red-700 mb-4">您需要管理员权限才能访问此页面。</p>
-          <a
-            href="/admin"
-            className="inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
-          >
-            返回管理后台
-          </a>
-        </div>
-      </div>
-    );
-  }
-
   // 加载评论数据
-  const loadComments = async () => {
+  const loadComments = useCallback(async () => {
     if (!user?.id) return;
 
     setLoading(true);
@@ -78,14 +58,14 @@ export default function CommentManagementServer({
     } finally {
       setLoading(false);
     }
-  };
+  }, [user?.id, currentPage, initialLimit]);
 
   // 初始加载
   useEffect(() => {
     if (user?.id && isAdmin) {
       loadComments();
     }
-  }, [user, isAdmin, currentPage]);
+  }, [loadComments, user?.id, isAdmin]);
 
   // 处理评论操作后的刷新
   const handleActionComplete = () => {
@@ -110,6 +90,26 @@ export default function CommentManagementServer({
         : comments.map((c) => c.id)
     );
   };
+
+  // 检查管理员权限
+  if (!user || !isAdmin) {
+    return (
+      <div className="max-w-2xl mx-auto text-center py-12">
+        <div className="bg-red-50 border border-red-200 rounded-lg p-8">
+          <h2 className="text-xl font-semibold text-red-900 mb-2">
+            访问被拒绝
+          </h2>
+          <p className="text-red-700 mb-4">您需要管理员权限才能访问此页面。</p>
+          <a
+            href="/admin"
+            className="inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
+          >
+            返回管理后台
+          </a>
+        </div>
+      </div>
+    );
+  }
 
   if (loading) {
     return <LoadingSpinner message="正在加载评论..." />;

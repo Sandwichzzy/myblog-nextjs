@@ -79,7 +79,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     let mounted = true;
     let hasInitialized = false;
-    let initTimeoutId: NodeJS.Timeout;
 
     // 初始化完成函数
     const completeInitialization = () => {
@@ -217,7 +216,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     initializeAuth();
 
     // 如果 3 秒后还没有初始化，强制结束加载状态
-    initTimeoutId = setTimeout(() => {
+    const initTimeoutId = setTimeout(() => {
       if (!hasInitialized && mounted) {
         console.warn("认证状态初始化超时，强制结束加载状态");
         console.warn("可能的原因：网络问题、Supabase配置问题或认证服务异常");

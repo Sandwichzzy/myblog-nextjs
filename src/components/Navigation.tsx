@@ -2,6 +2,7 @@
 
 import { useState, useRef, useEffect } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { useAuth } from "@/contexts/AuthContext";
 
 export default function Navigation() {
@@ -103,9 +104,11 @@ export default function Navigation() {
                     className="flex items-center space-x-2 text-gray-700 hover:text-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 rounded-full"
                   >
                     {user.profile?.avatar_url ? (
-                      <img
+                      <Image
                         src={user.profile.avatar_url}
                         alt={user.profile.display_name || "用户头像"}
+                        width={32}
+                        height={32}
                         className="w-8 h-8 rounded-full"
                       />
                     ) : (
@@ -271,9 +274,11 @@ export default function Navigation() {
                   {/* 用户信息 */}
                   <div className="px-3 py-2 flex items-center">
                     {user.profile?.avatar_url ? (
-                      <img
+                      <Image
                         src={user.profile.avatar_url}
                         alt={user.profile.display_name || "用户头像"}
+                        width={32}
+                        height={32}
                         className="w-8 h-8 rounded-full mr-3"
                       />
                     ) : (

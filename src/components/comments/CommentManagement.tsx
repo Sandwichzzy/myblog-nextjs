@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { Comment } from "@/types/database";
 import { formatDate } from "@/lib/utils";
 import { LoadingSpinner } from "@/components";
@@ -29,7 +29,7 @@ export default function CommentManagement({
   );
 
   // 获取评论列表
-  const fetchComments = async () => {
+  const fetchComments = useCallback(async () => {
     setLoading(true);
     try {
       let url = "/api/comments?limit=50";
@@ -76,19 +76,19 @@ export default function CommentManagement({
     } finally {
       setLoading(false);
     }
-  };
+  }, [filter]);
 
   // 初始加载
   useEffect(() => {
     if (initialComments.length === 0) {
       fetchComments();
     }
-  }, []);
+  }, [fetchComments, initialComments.length]);
 
   // 筛选器变化时重新获取
   useEffect(() => {
     fetchComments();
-  }, [filter]);
+  }, [fetchComments]);
 
   // 审核单个评论
   const moderateComment = async (

@@ -1,9 +1,4 @@
-import {
-  AdminPageSkeleton,
-  CardGridSkeleton,
-  LoadingSpinner,
-  PageLoadingIndicator,
-} from "@/components";
+import { AdminPageSkeleton, PageLoadingIndicator } from "@/components";
 
 export default function CommentsLoading() {
   return (

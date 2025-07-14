@@ -9,8 +9,6 @@ interface TwoColumnSkeletonProps {
 }
 
 export default function TwoColumnSkeleton({
-  leftTitle = "表单",
-  rightTitle = "列表",
   leftChildren,
   rightChildren,
   itemCount = 6,

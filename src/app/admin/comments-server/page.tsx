@@ -1,5 +1,4 @@
 import { Suspense } from "react";
-import { redirect } from "next/navigation";
 import CommentManagementServer from "@/components/comments/CommentManagementServer";
 import { LoadingSpinner } from "@/components";
 
