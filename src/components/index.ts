@@ -14,3 +14,18 @@ export { default as ArticleForm } from "./ArticleForm";
 export { default as DeleteArticleButton } from "./DeleteArticleButton";
 export { default as TagForm } from "./TagForm";
 export { default as TagActions } from "./TagActions";
+
+// 骨架屏组件
+export {
+  AdminPageSkeleton,
+  TableSkeleton,
+  CardGridSkeleton,
+  TwoColumnSkeleton,
+  PaginationSkeleton,
+  DashboardSkeleton,
+  PageLoadingIndicator,
+  LoadingSpinner,
+  SkeletonLoader,
+  CardSkeleton,
+  TableRowSkeleton,
+} from "./skeletons";

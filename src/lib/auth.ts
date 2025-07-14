@@ -70,23 +70,67 @@ export async function signOut() {
  * 获取当前用户信息
  */
 export async function getCurrentUser(): Promise<AuthUser | null> {
-  const {
-    data: { user },
-    error,
-  } = await supabase.auth.getUser();
+  try {
+    // 首先检查会话状态
+    const {
+      data: { session },
+      error: sessionError,
+    } = await supabase.auth.getSession();
 
-  if (error || !user) {
+    if (sessionError) {
+      console.error("获取会话失败:", sessionError);
+      return null;
+    }
+
+    if (!session) {
+      console.log("没有活跃的会话");
+      return null;
+    }
+
+    // 如果会话即将过期，尝试刷新
+    const now = Math.floor(Date.now() / 1000);
+    if (session.expires_at && session.expires_at - now < 300) {
+      // 5分钟内过期
+      console.log("会话即将过期，尝试刷新...");
+      const {
+        data: { session: refreshedSession },
+        error: refreshError,
+      } = await supabase.auth.refreshSession();
+
+      if (refreshError) {
+        console.error("刷新会话失败:", refreshError);
+        return null;
+      }
+
+      if (!refreshedSession) {
+        console.log("刷新后没有会话");
+        return null;
+      }
+    }
+
+    // 获取用户信息
+    const {
+      data: { user },
+      error,
+    } = await supabase.auth.getUser();
+
+    if (error || !user) {
+      console.error("获取用户信息失败:", error);
+      return null;
+    }
+
+    // 获取用户配置信息
+    const profile = await getUserProfile(user.id);
+
+    return {
+      id: user.id,
+      email: user.email,
+      profile: profile || undefined,
+    };
+  } catch (error) {
+    console.error("getCurrentUser 失败:", error);
     return null;
   }
-
-  // 获取用户配置信息
-  const profile = await getUserProfile(user.id);
-
-  return {
-    id: user.id,
-    email: user.email,
-    profile: profile || undefined,
-  };
 }
 
 /**
@@ -208,9 +252,6 @@ export async function isUserAdmin(userId?: string): Promise<boolean> {
       .eq("id", userId)
       .eq("is_active", true)
       .maybeSingle();
-
-    console.log("🔍 查询结果:", data);
-    console.log("🔍 查询错误:", error);
 
     if (error) {
       console.error("检查管理员权限失败:", error);
