@@ -35,6 +35,11 @@ const nextConfig: NextConfig = {
       },
     ],
   },
+  // ISR 性能优化配置
+  // 页面预渲染优化
+  trailingSlash: false,
+  // 压缩配置
+  compress: true,
 };
 
 export default nextConfig;

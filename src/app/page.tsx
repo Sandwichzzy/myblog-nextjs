@@ -1,17 +1,33 @@
 import Link from "next/link";
-import { getPublishedArticles } from "@/lib/articles";
-import ArticleCard from "@/components/ArticleCard";
-import { ArticleForDisplay } from "@/types/database";
+import { ArticleCard } from "@/components";
+import { getHomePageData } from "@/lib/isr-utils";
+
+// 配置ISR - 首页使用统一的配置
+export const revalidate = 600;
+
+// 为首页生成动态metadata
+export async function generateMetadata() {
+  const { totalCount } = await getHomePageData();
+
+  return {
+    title: "我的博客",
+    description: `分享技术见解、生活感悟和学习心得的个人空间。已发布 ${totalCount} 篇文章。`,
+    openGraph: {
+      title: "我的博客",
+      description: `分享技术见解、生活感悟和学习心得的个人空间。已发布 ${totalCount} 篇文章。`,
+      type: "website",
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: "我的博客",
+      description: `分享技术见解、生活感悟和学习心得的个人空间。已发布 ${totalCount} 篇文章。`,
+    },
+  };
+}
 
 export default async function Home() {
-  // 获取最新的三篇文章
-  let latestArticles: ArticleForDisplay[] = [];
-  try {
-    const result = await getPublishedArticles(1, 3); // 获取第1页，3篇文章
-    latestArticles = result.articles;
-  } catch (error) {
-    console.error("获取最新文章失败:", error);
-  }
+  // 使用ISR优化的数据获取
+  const { latestArticles, totalCount } = await getHomePageData();
 
   return (
     <div className="bg-white">
@@ -50,6 +66,11 @@ export default async function Home() {
             <h2 className="text-3xl font-bold text-gray-900">最新文章</h2>
             <p className="mt-4 text-lg text-gray-600">
               分享最新的技术见解和思考
+              {totalCount > 0 && (
+                <span className="ml-2 text-blue-600">
+                  · 已发布 {totalCount} 篇文章
+                </span>
+              )}
             </p>
           </div>
 

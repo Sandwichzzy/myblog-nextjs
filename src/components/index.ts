@@ -9,6 +9,7 @@ export { default as AuthGuard } from "./AuthGuard";
 // 文章相关组件
 export { default as ArticleCard } from "./ArticleCard";
 export { default as SearchAndFilter } from "./SearchAndFilter";
+export { default as SearchAndFilterServer } from "./SearchAndFilterServer";
 export { default as Pagination } from "./Pagination";
 export { default as ArticleForm } from "./ArticleForm";
 export { default as DeleteArticleButton } from "./DeleteArticleButton";

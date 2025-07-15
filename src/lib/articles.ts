@@ -145,8 +145,6 @@ export async function getArticleBySlugAdmin(
 
 // 增加文章浏览量
 export async function incrementViewCount(articleId: string) {
-  console.log(`[incrementViewCount] 开始处理文章 ${articleId} 的浏览量增加`);
-
   // 先获取当前浏览量
   const { data: currentArticle, error: fetchError } = await supabase
     .from("articles")
@@ -161,10 +159,6 @@ export async function incrementViewCount(articleId: string) {
 
   const currentViewCount = currentArticle.view_count || 0;
   const newViewCount = currentViewCount + 1;
-
-  console.log(
-    `[incrementViewCount] 文章 ${articleId} 当前浏览量: ${currentViewCount}, 将更新为: ${newViewCount}`
-  );
 
   // 增加浏览量
   const { error } = await supabase

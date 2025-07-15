@@ -11,3 +11,4 @@ export { default as LoadingSpinner } from "./LoadingSpinner";
 export { default as SkeletonLoader } from "./LoadingSpinner";
 export { default as CardSkeleton } from "./LoadingSpinner";
 export { default as TableRowSkeleton } from "./LoadingSpinner";
+export { default as ArticlesPageSkeleton } from "./ArticlesPageSkeleton";

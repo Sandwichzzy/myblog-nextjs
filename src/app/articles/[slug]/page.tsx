@@ -14,6 +14,71 @@ import {
   FooterButtons,
 } from "./ArticleInteractions";
 
+// 配置ISR - 文章详情页使用统一的配置
+export const revalidate = 3600;
+
+// 为最新的文章生成静态路径
+export async function generateStaticParams() {
+  try {
+    const { getPublishedArticles } = await import("@/lib/articles");
+    const result = await getPublishedArticles(1, 20); // 预生成最新20篇文章
+
+    return result.articles.map((article) => ({
+      slug: article.slug,
+    }));
+  } catch (error) {
+    console.error("生成静态参数失败:", error);
+    return [];
+  }
+}
+
+// 为文章页面生成动态metadata
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ slug: string }>;
+}) {
+  const { slug } = await params;
+
+  try {
+    const { getArticleBySlug } = await import("@/lib/articles");
+    const article = await getArticleBySlug(slug);
+
+    if (!article) {
+      return {
+        title: "文章不存在",
+        description: "抱歉，您访问的文章不存在或已被删除。",
+      };
+    }
+
+    return {
+      title: article.title,
+      description: article.excerpt || `阅读文章：${article.title}`,
+      keywords: article.tags?.map((tag) => tag.tag?.name).filter(Boolean) || [],
+      authors: [{ name: "我的博客" }],
+      openGraph: {
+        title: article.title,
+        description: article.excerpt || `阅读文章：${article.title}`,
+        type: "article",
+        publishedTime: article.created_at,
+        modifiedTime: article.updated_at,
+        tags: article.tags?.map((tag) => tag.tag?.name).filter(Boolean) || [],
+      },
+      twitter: {
+        card: "summary_large_image",
+        title: article.title,
+        description: article.excerpt || `阅读文章：${article.title}`,
+      },
+    };
+  } catch (error) {
+    console.error("生成文章metadata失败:", error);
+    return {
+      title: "文章加载失败",
+      description: "文章加载时遇到问题，请稍后重试。",
+    };
+  }
+}
+
 interface PageProps {
   params: Promise<{ slug: string }>;
 }

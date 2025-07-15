@@ -1,7 +1,6 @@
 "use client";
 
 import { useState, useCallback, useEffect } from "react";
-import { useRouter } from "next/navigation";
 import { createTagSchema } from "@/lib/validations";
 import { z } from "zod";
 import { Tag } from "@/types/database";
@@ -11,7 +10,6 @@ interface TagFormProps {
 }
 
 export default function TagForm({ onTagCreate }: TagFormProps) {
-  const router = useRouter();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isChecking, setIsChecking] = useState(false);
   const [nameError, setNameError] = useState<string | null>(null);
