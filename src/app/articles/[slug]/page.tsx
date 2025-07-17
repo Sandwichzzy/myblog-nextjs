@@ -13,7 +13,6 @@ import {
   TagButton,
   FooterButtons,
 } from "./ArticleInteractions";
-import { Metadata } from "next";
 
 // 配置ISR - 文章详情页使用统一的配置
 export const revalidate = 3600;
