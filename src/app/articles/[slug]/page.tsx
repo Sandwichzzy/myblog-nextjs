@@ -13,6 +13,7 @@ import {
   TagButton,
   FooterButtons,
 } from "./ArticleInteractions";
+import { Metadata } from "next";
 
 // 配置ISR - 文章详情页使用统一的配置
 export const revalidate = 3600;
@@ -102,8 +103,41 @@ export default async function ArticleDetailPage({ params }: PageProps) {
     console.error("增加浏览量失败:", error);
   });
 
+  // JSON-LD 结构化数据
+  const jsonLd = {
+    "@context": "https://schema.org",
+    "@type": "Article",
+    headline: article.title,
+    description: article.excerpt || article.content.slice(0, 120),
+    datePublished: article.created_at,
+    dateModified: article.updated_at,
+    author: {
+      "@type": "Person",
+      name: article.author_id || "未知作者",
+    },
+    publisher: {
+      "@type": "Organization",
+      name: "我的博客",
+    },
+    mainEntityOfPage: {
+      "@type": "WebPage",
+      "@id": `https://myblog-nextjs-jade.vercel.app/articles/${article.slug}`,
+    },
+    keywords:
+      article.tags
+        ?.map((t) => t.tag?.name)
+        .filter(Boolean)
+        .join(", ") || undefined,
+  };
+
   return (
     <div className="min-h-screen bg-gray-50">
+      {/* 注入 JSON-LD 结构化数据 */}
+      <script
+        type="application/ld+json"
+        suppressHydrationWarning
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
       <article className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* 文章头部 */}
         <header className="mb-8">

@@ -1,5 +1,13 @@
 import Link from "next/link";
 
+// SEO 友好元数据
+export function generateMetadata() {
+  return {
+    title: "文章不存在 - 我的博客",
+    description: "您访问的文章不存在或已被删除。返回首页或浏览其它精彩内容。",
+  };
+}
+
 export default function NotFound() {
   return (
     <div className="min-h-screen bg-gray-50">
