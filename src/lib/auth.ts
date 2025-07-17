@@ -14,7 +14,10 @@ export async function signInWithProvider(provider: Provider) {
   const { data, error } = await supabase.auth.signInWithOAuth({
     provider,
     options: {
-      redirectTo: `${window.location.origin}/auth/callback`,
+      redirectTo:
+        process.env.NODE_ENV === "development"
+          ? `${window.location.origin}/auth/callback`
+          : `https://myblog-nextjs-jade.vercel.app/auth/callback`,
     },
   });
 
