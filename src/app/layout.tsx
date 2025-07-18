@@ -3,6 +3,9 @@ import "./globals.css";
 import { MainLayout } from "@/components";
 import { AuthProvider } from "@/contexts/AuthContext";
 
+// 站点URL（SEO元数据使用）
+const SITE_URL = "https://myblog-nextjs-jade.vercel.app";
+
 export const metadata: Metadata = {
   title: {
     default: "我的博客",
@@ -12,11 +15,11 @@ export const metadata: Metadata = {
   keywords: ["博客", "技术", "编程", "Web开发", "Next.js"],
   authors: [{ name: "我的博客" }],
   creator: "我的博客",
-  metadataBase: new URL("https://my-blog.com"),
+  metadataBase: new URL(SITE_URL),
   openGraph: {
     type: "website",
     locale: "zh_CN",
-    url: "https://my-blog.com",
+    url: SITE_URL,
     siteName: "我的博客",
     title: "我的博客",
     description: "分享技术思考与生活感悟，记录成长的每一步",

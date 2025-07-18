@@ -7,17 +7,18 @@ import type { Provider } from "@supabase/supabase-js";
 // ============================================================================
 
 /**
- * 使用OAuth提供商登录
+ * 使用OAuth提供商登录（客户端版本，已弃用，建议使用服务端API）
  * @param provider OAuth提供商 ('github' | 'google')
+ * @deprecated 建议使用 /api/auth/signin API 路由
  */
 export async function signInWithProvider(provider: Provider) {
+  // 使用客户端当前域名
+  const redirectUrl = `${window.location.origin}/auth/callback`;
+
   const { data, error } = await supabase.auth.signInWithOAuth({
     provider,
     options: {
-      redirectTo:
-        process.env.NODE_ENV === "development"
-          ? `${window.location.origin}/auth/callback`
-          : `https://myblog-nextjs-jade.vercel.app/auth/callback`,
+      redirectTo: redirectUrl,
     },
   });
 

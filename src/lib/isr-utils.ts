@@ -136,11 +136,14 @@ export async function revalidateISRPaths(paths: string[]): Promise<void> {
   }
 
   try {
+    // 站点URL（ISR重新验证使用）
+    const SITE_URL = "https://myblog-nextjs-jade.vercel.app";
+
     // 在生产环境中，可以使用Next.js的revalidate API
     // 这里只是示例，实际实现需要根据部署环境调整
     for (const path of paths) {
       console.log(`重新验证路径: ${path}`);
-      // await fetch(`${process.env.NEXT_PUBLIC_SITE_URL}/api/revalidate?path=${path}`);
+      await fetch(`${SITE_URL}/api/revalidate?path=${path}`);
     }
   } catch (error) {
     console.error("ISR重新验证失败:", error);

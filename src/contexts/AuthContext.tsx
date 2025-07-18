@@ -4,7 +4,6 @@ import React, { createContext, useContext, useEffect, useState } from "react";
 import { AuthContextType, AuthUser } from "@/types/database";
 import {
   getCurrentUser,
-  signInWithProvider,
   signOut as authSignOut,
   onAuthStateChange,
   isUserAdmin,
@@ -24,8 +23,23 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   // 登录函数
   const signIn = async (provider: Provider) => {
     try {
-      await signInWithProvider(provider);
-      // OAuth重定向，无需在此处理用户状态
+      // 调用服务端 API 进行 OAuth 登录
+      const response = await fetch("/api/auth/signin", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ provider }),
+      });
+
+      const data = await response.json();
+
+      if (!data.success) {
+        throw new Error(data.error || "登录失败");
+      }
+
+      // 重定向到 OAuth 提供商
+      window.location.href = data.url;
     } catch (error) {
       console.error("登录失败:", error);
       throw error;

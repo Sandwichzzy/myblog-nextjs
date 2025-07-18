@@ -102,6 +102,9 @@ export default async function ArticleDetailPage({ params }: PageProps) {
     console.error("增加浏览量失败:", error);
   });
 
+  // 站点URL（SEO元数据使用）
+  const SITE_URL = "https://myblog-nextjs-jade.vercel.app";
+
   // JSON-LD 结构化数据
   const jsonLd = {
     "@context": "https://schema.org",
@@ -120,7 +123,7 @@ export default async function ArticleDetailPage({ params }: PageProps) {
     },
     mainEntityOfPage: {
       "@type": "WebPage",
-      "@id": `https://myblog-nextjs-jade.vercel.app/articles/${article.slug}`,
+      "@id": `${SITE_URL}/articles/${article.slug}`,
     },
     keywords:
       article.tags

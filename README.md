@@ -7,6 +7,7 @@
 - **现代化技术栈**：Next.js 15 + TypeScript + Supabase + Tailwind CSS
 - **服务端渲染**：优化 SEO 和首屏加载速度
 - **增量静态再生**：ISR 策略提升性能
+- **智能认证系统**：使用 `headers().get('origin')` 自动适配多环境
 - **实时评论**：基于 Supabase 的评论系统
 - **标签分类**：文章标签管理和筛选
 - **管理后台**：文章和评论的后台管理
@@ -94,6 +95,7 @@
   - [x] OAuth 提供商配置 (GitHub, Google)
   - [x] 认证工具函数库 (`src/lib/auth.ts`)
   - [x] TypeScript 类型定义扩展
+  - [x] 服务端 OAuth API (`/api/auth/signin`) - 使用 `headers().get('origin')` 自动获取域名
 
 - [x] **状态管理**
 
@@ -449,6 +451,12 @@ comments (
    DATABASE_URL=your-database-url
    ```
 
+   **环境区分逻辑：**
+
+   - **OAuth 登录**：自动使用 `headers().get('origin')` 获取当前域名
+   - **SEO 元数据**：使用固定的生产环境域名
+   - 无需手动配置域名，系统会自动适配开发、测试、生产环境
+
 2. **数据库初始化**
    在 Supabase SQL 编辑器中依次运行：
 
@@ -728,6 +736,45 @@ export const ISR_CONFIG = {
 - **SEO 优化**：服务器端渲染确保搜索引擎可以正确索引
 - **用户体验**：即时加载的静态内容 + 必要的动态功能
 - **服务器负载**：减少数据库查询，提升整体性能
+
+## 🔐 智能认证系统
+
+### OAuth 域名自动适配
+
+本项目实现了智能的 OAuth 认证系统，使用 Next.js 推荐的 `headers().get('origin')` 方法自动获取当前域名：
+
+```typescript
+// 服务端 API 路由 (/api/auth/signin)
+const origin = request.headers.get("origin");
+const redirectUrl = `${origin}/auth/callback`;
+
+const { data, error } = await supabase.auth.signInWithOAuth({
+  provider: provider as Provider,
+  options: { redirectTo: redirectUrl },
+});
+```
+
+### 优势
+
+- **自动环境适配**：无需手动配置域名，自动适配开发、测试、生产环境
+- **Next.js 最佳实践**：使用官方推荐的方式获取请求域名
+- **简化部署**：减少环境变量配置，降低部署复杂度
+- **安全性提升**：服务端处理 OAuth 逻辑，避免客户端暴露敏感信息
+- **SEO 优化**：使用固定的生产域名，确保搜索引擎正确索引
+
+### 实现架构
+
+1. **服务端 API 路由** (`/api/auth/signin`)：处理 OAuth 登录请求
+2. **客户端调用**：通过 fetch 调用服务端 API
+3. **自动重定向**：获取 OAuth URL 后自动重定向到提供商
+
+### 环境变量简化
+
+通过使用 `headers().get('origin')` 和固定的生产域名，我们成功简化了环境变量配置：
+
+- **移除**：`NEXT_PUBLIC_SITE_URL` 环境变量
+- **保留**：Supabase 相关环境变量（必需）
+- **效果**：减少配置复杂度，提高部署便利性
 
 ## 🚀 部署
 
