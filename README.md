@@ -253,48 +253,205 @@
 
 ## 🗄️ 数据库结构
 
-### 主要表结构
+### 完整表结构
 
 ```sql
--- 文章表
-articles (
-  id UUID PRIMARY KEY,
-  title VARCHAR(255),
-  slug VARCHAR(255) UNIQUE,
-  content TEXT,
-  excerpt TEXT,
-  author_id UUID,
-  created_at TIMESTAMP,
-  updated_at TIMESTAMP,
-  published BOOLEAN,
-  view_count INTEGER
-)
+-- ============================================================================
+-- 核心数据表设计
+-- ============================================================================
 
--- 标签表
-tags (
-  id UUID PRIMARY KEY,
-  name VARCHAR(100) UNIQUE,
+-- 文章表 (articles)
+CREATE TABLE articles (
+  id UUID DEFAULT uuid_generate_v4() PRIMARY KEY,
+  title VARCHAR(255) NOT NULL,                    -- 文章标题
+  slug VARCHAR(255) UNIQUE NOT NULL,              -- URL友好标识符
+  content TEXT NOT NULL,                          -- 文章正文（Markdown）
+  excerpt TEXT,                                   -- 文章摘要
+  author_id UUID,                                 -- 作者ID（预留）
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+  updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+  published BOOLEAN DEFAULT false,                -- 发布状态
+  view_count INTEGER DEFAULT 0                    -- 浏览量
+);
+
+-- 标签表 (tags)
+CREATE TABLE tags (
+  id UUID DEFAULT uuid_generate_v4() PRIMARY KEY,
+  name VARCHAR(100) UNIQUE NOT NULL,              -- 标签名称
+  color VARCHAR(7) DEFAULT '#3B82F6',             -- 标签颜色（十六进制）
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
+-- 文章标签关联表 (article_tags)
+CREATE TABLE article_tags (
+  article_id UUID REFERENCES articles(id) ON DELETE CASCADE,
+  tag_id UUID REFERENCES tags(id) ON DELETE CASCADE,
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+  PRIMARY KEY (article_id, tag_id)               -- 复合主键防重复
+);
+
+-- 评论表 (comments)
+CREATE TABLE comments (
+  id UUID DEFAULT uuid_generate_v4() PRIMARY KEY,
+  article_id UUID REFERENCES articles(id) ON DELETE CASCADE,
+  author_name VARCHAR(100) NOT NULL,              -- 评论者姓名
+  author_email VARCHAR(255),                      -- 评论者邮箱
+  content TEXT NOT NULL,                          -- 评论内容
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+  published BOOLEAN DEFAULT false,                -- 审核状态
+  user_id UUID REFERENCES auth.users(id) ON DELETE SET NULL -- 关联用户ID
+);
+
+-- 用户配置表 (user_profiles) - 扩展Supabase Auth
+CREATE TABLE user_profiles (
+  id UUID REFERENCES auth.users(id) ON DELETE CASCADE PRIMARY KEY,
+  display_name VARCHAR(255),                      -- 显示名称
+  avatar_url TEXT,                               -- 头像URL
+  role VARCHAR(20) DEFAULT 'user' CHECK (role IN ('user', 'admin')), -- 用户角色
+  is_active BOOLEAN DEFAULT true,                -- 账户状态
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+  updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+```
+
+### 索引优化
+
+```sql
+-- 性能优化索引
+CREATE INDEX idx_articles_published ON articles(published);
+CREATE INDEX idx_articles_created_at ON articles(created_at DESC);
+CREATE INDEX idx_articles_slug ON articles(slug);
+CREATE INDEX idx_comments_article_id ON comments(article_id);
+CREATE INDEX idx_comments_published ON comments(published);
+CREATE INDEX idx_comments_user_id ON comments(user_id);
+
+-- 全文搜索索引
+CREATE INDEX articles_search_idx ON articles
+USING gin(to_tsvector('english', title || ' ' || content));
+```
+
+### 行级安全策略 (RLS)
+
+```sql
+-- 启用所有表的行级安全
+ALTER TABLE articles ENABLE ROW LEVEL SECURITY;
+ALTER TABLE tags ENABLE ROW LEVEL SECURITY;
+ALTER TABLE article_tags ENABLE ROW LEVEL SECURITY;
+ALTER TABLE comments ENABLE ROW LEVEL SECURITY;
+ALTER TABLE user_profiles ENABLE ROW LEVEL SECURITY;
+
+-- 文章访问策略
+CREATE POLICY "Everyone can read published articles" ON articles
+  FOR SELECT USING (published = true);
+
+-- 标签访问策略
+CREATE POLICY "Everyone can read tags" ON tags
+  FOR SELECT USING (true);
+
+-- 评论访问策略
+CREATE POLICY "Everyone can read published comments" ON comments
+  FOR SELECT USING (published = true);
+
+-- 只允许登录用户创建评论
+CREATE POLICY "Authenticated users can create comments" ON comments
+  FOR INSERT WITH CHECK (auth.uid() IS NOT NULL);
+
+-- 用户配置策略
+CREATE POLICY "Users can view own profile" ON user_profiles
+  FOR SELECT USING (auth.uid() = id);
+
+CREATE POLICY "Users can update own profile" ON user_profiles
+  FOR UPDATE USING (auth.uid() = id);
+
+-- 管理员可以查看所有配置
+CREATE POLICY "Admins can view all profiles" ON user_profiles
+  FOR SELECT USING (
+    EXISTS (
+      SELECT 1 FROM user_profiles
+      WHERE id = auth.uid() AND role = 'admin'
+    )
+  );
+```
+
+### 自动化触发器
+
+```sql
+-- 自动更新时间戳
+CREATE OR REPLACE FUNCTION update_updated_at_column()
+RETURNS TRIGGER AS $$
+BEGIN
+  NEW.updated_at = NOW();
+  RETURN NEW;
+END;
+$$ language 'plpgsql';
+
+CREATE TRIGGER update_articles_updated_at
+  BEFORE UPDATE ON articles
+  FOR EACH ROW
+  EXECUTE FUNCTION update_updated_at_column();
+
+-- 用户注册后自动创建配置
+CREATE OR REPLACE FUNCTION create_user_profile()
+RETURNS TRIGGER AS $$
+BEGIN
+  INSERT INTO public.user_profiles (
+    id, display_name, avatar_url, role, is_active, created_at, updated_at
+  ) VALUES (
+    NEW.id,
+    COALESCE(
+      NEW.raw_user_meta_data->>'full_name',
+      NEW.raw_user_meta_data->>'name',
+      split_part(NEW.email, '@', 1)
+    ),
+    NEW.raw_user_meta_data->>'avatar_url',
+    'user',
+    true,
+    NOW(),
+    NOW()
+  );
+  RETURN NEW;
+END;
+$$ language 'plpgsql' SECURITY DEFINER;
+
+CREATE TRIGGER on_auth_user_created
+  AFTER INSERT ON auth.users
+  FOR EACH ROW
+  EXECUTE FUNCTION create_user_profile();
+```
+
+### 业务逻辑函数
+
+```sql
+-- 原子性增加文章浏览量
+CREATE OR REPLACE FUNCTION increment_view_count(article_id UUID)
+RETURNS void AS $$
+BEGIN
+  UPDATE articles
+  SET view_count = view_count + 1
+  WHERE id = article_id;
+END;
+$$ language 'plpgsql';
+
+-- 获取标签统计
+CREATE OR REPLACE FUNCTION get_tags_with_count()
+RETURNS TABLE(
+  id UUID,
+  name VARCHAR(100),
   color VARCHAR(7),
-  created_at TIMESTAMP
-)
-
--- 文章标签关联表
-article_tags (
-  article_id UUID REFERENCES articles(id),
-  tag_id UUID REFERENCES tags(id),
-  created_at TIMESTAMP
-)
-
--- 评论表
-comments (
-  id UUID PRIMARY KEY,
-  article_id UUID REFERENCES articles(id),
-  author_name VARCHAR(100),
-  author_email VARCHAR(255),
-  content TEXT,
-  created_at TIMESTAMP,
-  published BOOLEAN
-)
+  created_at TIMESTAMP WITH TIME ZONE,
+  article_count BIGINT
+) AS $$
+BEGIN
+  RETURN QUERY
+  SELECT t.id, t.name, t.color, t.created_at,
+         COUNT(at.article_id) as article_count
+  FROM tags t
+  LEFT JOIN article_tags at ON t.id = at.tag_id
+  LEFT JOIN articles a ON at.article_id = a.id AND a.published = true
+  GROUP BY t.id, t.name, t.color, t.created_at
+  ORDER BY article_count DESC, t.name;
+END;
+$$ language 'plpgsql';
 ```
 
 ## 🛠️ 已实现功能
@@ -317,7 +474,278 @@ comments (
 - **安全防护**：限流、内容清理、XSS 防护
 - **类型安全**：完整的 TypeScript 类型支持
 
-### API 端点
+## 📡 API 接口文档
+
+### 认证相关 API
+
+#### POST /api/auth/signin
+
+OAuth 登录接口
+
+**请求体:**
+
+```json
+{
+  "provider": "github" | "google"
+}
+```
+
+**响应:**
+
+```json
+{
+  "success": true,
+  "url": "https://oauth-provider-url..."
+}
+```
+
+### 文章 API
+
+#### GET /api/articles
+
+获取文章列表
+
+**查询参数:**
+
+- `page`: 页码 (默认: 1)
+- `limit`: 每页数量 (默认: 10, 最大: 100)
+- `tag`: 标签筛选
+- `search`: 搜索关键词
+- `published`: 发布状态 (默认只返回已发布文章)
+
+**响应:**
+
+```json
+{
+  "success": true,
+  "data": [
+    {
+      "id": "uuid",
+      "title": "文章标题",
+      "slug": "article-slug",
+      "excerpt": "文章摘要",
+      "published": true,
+      "view_count": 100,
+      "created_at": "2024-01-01T00:00:00Z",
+      "tags": [...]
+    }
+  ],
+  "pagination": {
+    "page": 1,
+    "limit": 10,
+    "totalPages": 5,
+    "totalCount": 50
+  }
+}
+```
+
+#### POST /api/articles
+
+创建新文章 (需要管理员权限)
+
+**请求体:**
+
+```json
+{
+  "title": "文章标题",
+  "slug": "article-slug",
+  "content": "文章内容（Markdown）",
+  "excerpt": "文章摘要",
+  "published": false,
+  "tagIds": ["tag-uuid-1", "tag-uuid-2"]
+}
+```
+
+#### GET /api/articles/[slug]
+
+获取文章详情
+
+**查询参数:**
+
+- `increment_view`: 是否增加浏览量 (默认: true)
+
+**响应:**
+
+```json
+{
+  "success": true,
+  "data": {
+    "id": "uuid",
+    "title": "文章标题",
+    "slug": "article-slug",
+    "content": "完整文章内容",
+    "excerpt": "文章摘要",
+    "published": true,
+    "view_count": 100,
+    "created_at": "2024-01-01T00:00:00Z",
+    "updated_at": "2024-01-01T00:00:00Z",
+    "tags": [...]
+  }
+}
+```
+
+#### PUT /api/articles/[slug]
+
+更新文章 (需要管理员权限)
+
+**请求体:** (所有字段可选)
+
+```json
+{
+  "title": "新标题",
+  "slug": "new-slug",
+  "content": "新内容",
+  "excerpt": "新摘要",
+  "published": true,
+  "tagIds": ["tag-uuid-1"]
+}
+```
+
+#### DELETE /api/articles/[slug]
+
+删除文章 (需要管理员权限)
+
+### 标签 API
+
+#### GET /api/tags
+
+获取标签列表
+
+**查询参数:**
+
+- `search`: 搜索关键词
+- `limit`: 数量限制 (默认: 10, 最大: 50)
+- `popular`: 是否只获取热门标签 (默认: false)
+
+**响应:**
+
+```json
+{
+  "success": true,
+  "data": [
+    {
+      "id": "uuid",
+      "name": "JavaScript",
+      "color": "#F7DF1E",
+      "created_at": "2024-01-01T00:00:00Z",
+      "article_count": 5
+    }
+  ]
+}
+```
+
+#### POST /api/tags
+
+创建新标签 (需要管理员权限)
+
+**请求体:**
+
+```json
+{
+  "name": "标签名称",
+  "color": "#3B82F6"
+}
+```
+
+#### PUT /api/tags/[id]
+
+更新标签 (需要管理员权限)
+
+#### DELETE /api/tags/[id]
+
+删除标签 (需要管理员权限)
+
+### 评论 API
+
+#### GET /api/comments
+
+获取评论列表
+
+**查询参数:**
+
+- `page`: 页码 (默认: 1)
+- `limit`: 每页数量 (默认: 20, 最大: 100)
+- `articleId`: 文章 ID 筛选
+- `published`: 发布状态筛选 (管理员功能)
+
+**响应:**
+
+```json
+{
+  "success": true,
+  "data": [
+    {
+      "id": "uuid",
+      "article_id": "uuid",
+      "author_name": "用户名",
+      "author_email": "user@example.com",
+      "content": "评论内容",
+      "published": true,
+      "created_at": "2024-01-01T00:00:00Z",
+      "user_id": "uuid"
+    }
+  ],
+  "pagination": {...}
+}
+```
+
+#### POST /api/comments
+
+创建新评论 (需要登录)
+
+**请求体:**
+
+```json
+{
+  "articleId": "uuid",
+  "author_name": "用户名",
+  "author_email": "user@example.com",
+  "content": "评论内容"
+}
+```
+
+### 管理员 API
+
+#### PATCH /api/admin/comments/[id]
+
+审核单个评论 (需要管理员权限)
+
+**请求体:**
+
+```json
+{
+  "published": true
+}
+```
+
+#### DELETE /api/admin/comments/[id]
+
+删除评论 (需要管理员权限)
+
+#### POST /api/admin/comments/bulk
+
+批量操作评论 (需要管理员权限)
+
+**请求体:**
+
+```json
+{
+  "action": "approve" | "reject" | "delete",
+  "commentIds": ["uuid1", "uuid2"]
+}
+```
+
+### API 通用特性
+
+- **统一响应格式**: 所有 API 使用标准化的 JSON 响应格式
+- **数据验证**: 使用 Zod 进行严格的输入验证
+- **错误处理**: 完善的错误捕获和格式化
+- **限流保护**: 防止 API 滥用的限流机制
+- **缓存策略**: 智能缓存配置优化性能
+- **安全防护**: XSS 防护、内容清理、权限验证
+- **类型安全**: 完整的 TypeScript 类型支持
+
+### API 端点概览
 
 #### 文章 API
 
@@ -331,11 +759,23 @@ comments (
 
 - `GET /api/tags` - 获取标签列表（支持搜索、热门标签）
 - `POST /api/tags` - 创建新标签（管理员）
+- `PUT /api/tags/[id]` - 更新标签（管理员）
+- `DELETE /api/tags/[id]` - 删除标签（管理员）
 
 #### 评论 API
 
 - `GET /api/comments` - 获取评论列表（支持按文章筛选、审核状态）
-- `POST /api/comments` - 创建新评论（公开）
+- `POST /api/comments` - 创建新评论（需要登录）
+
+#### 认证 API
+
+- `POST /api/auth/signin` - OAuth 登录（GitHub、Google）
+
+#### 管理员 API
+
+- `PATCH /api/admin/comments/[id]` - 审核单个评论
+- `DELETE /api/admin/comments/[id]` - 删除评论
+- `POST /api/admin/comments/bulk` - 批量操作评论
 
 ### 数据访问层
 
@@ -437,24 +877,30 @@ comments (
    - 无需手动配置域名，系统会自动适配开发、测试、生产环境
 
 2. **数据库初始化**
-   在 Supabase SQL 编辑器中依次运行：
+   在 Supabase SQL 编辑器中依次运行以下脚本：
 
    ```sql
-   -- 基础表结构
+   -- 1. 基础表结构和索引
    \i database/schema.sql
 
-   -- 用户认证扩展
+   -- 2. 用户认证系统扩展
    \i database/auth-extension.sql
 
-   -- 修复 RLS 递归问题
+   -- 3. 修复 RLS 递归问题
    \i database/fix-rls-recursion.sql
 
-   -- 修复评论系统用户身份验证
+   -- 4. 修复评论系统用户身份验证
    \i database/fix-comment-user-auth.sql
 
-   -- RPC 函数（标签计数等）
+   -- 5. RPC 函数（标签计数等）
    \i database/rpc-functions.sql
    ```
+
+   **注意事项：**
+
+   - 确保按照顺序执行脚本
+   - 每个脚本执行完成后检查是否有错误
+   - 第一个注册的用户会自动成为管理员
 
 3. **OAuth 提供商配置**
    在 Supabase Dashboard > Authentication > Providers 中配置：
