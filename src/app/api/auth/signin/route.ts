@@ -17,6 +17,7 @@ export async function POST(request: NextRequest) {
     // 使用 headers().get('origin') 自动获取当前域名
     const origin = request.headers.get("origin");
 
+    console.log("origin", origin);
     if (!origin) {
       return NextResponse.json(
         { success: false, error: "无法获取当前域名" },
