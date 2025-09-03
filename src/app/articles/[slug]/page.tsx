@@ -244,6 +244,7 @@ export default async function ArticleDetailPage({ params }: PageProps) {
                 components={{
                   // 自定义图片渲染
                   img: ({ src, alt, ...props }) => {
+                    // eslint-disable-next-line @typescript-eslint/no-unused-vars
                     const { width, height, ...restProps } = props;
                     const imageSrc = src as string;
 
