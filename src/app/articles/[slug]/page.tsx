@@ -3,7 +3,9 @@ import ReactMarkdown from "react-markdown";
 import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
 import { tomorrow } from "react-syntax-highlighter/dist/esm/styles/prism";
 import remarkGfm from "remark-gfm";
+import remarkMath from "remark-math";
 import rehypeRaw from "rehype-raw";
+import rehypeKatex from "rehype-katex";
 import { formatDate, calculateReadingTime } from "@/lib/utils";
 import { getArticleBySlug, incrementViewCount } from "@/lib/articles";
 import { getArticleComments } from "@/lib/comments";
@@ -13,6 +15,7 @@ import {
   TagButton,
   FooterButtons,
 } from "./ArticleInteractions";
+import Image from "next/image";
 
 // 配置ISR - 文章详情页使用统一的配置
 export const revalidate = 3600;
@@ -236,9 +239,66 @@ export default async function ArticleDetailPage({ params }: PageProps) {
           <div className="p-8">
             <div className="prose prose-lg max-w-none prose-headings:text-gray-900 prose-p:text-gray-700 prose-p:leading-relaxed prose-p:mb-4 prose-a:text-blue-600 prose-a:no-underline hover:prose-a:underline prose-strong:text-gray-900 prose-blockquote:text-gray-600 prose-blockquote:border-blue-200 prose-li:text-gray-700 prose-pre:bg-gray-900 prose-pre:text-gray-100">
               <ReactMarkdown
-                remarkPlugins={[remarkGfm]}
-                rehypePlugins={[rehypeRaw]}
+                remarkPlugins={[remarkGfm, remarkMath]}
+                rehypePlugins={[rehypeRaw, rehypeKatex]}
                 components={{
+                  // 自定义图片渲染
+                  img: ({ src, alt, ...props }) => {
+                    const { width, height, ...restProps } = props;
+                    const imageSrc = src as string;
+
+                    // 验证URL是否有效
+                    const isValidUrl = (url: string) => {
+                      try {
+                        new URL(url);
+                        return true;
+                      } catch {
+                        // 检查是否是相对路径
+                        return (
+                          url.startsWith("/") ||
+                          url.startsWith("./") ||
+                          url.startsWith("../")
+                        );
+                      }
+                    };
+
+                    // 如果没有src或src为空，直接返回错误提示
+                    if (!imageSrc || imageSrc.trim() === "") {
+                      return (
+                        <div className="my-6 p-4 bg-gray-100 rounded-lg text-center text-gray-500">
+                          <p>图片路径为空</p>
+                          {alt && <p className="text-sm mt-1 italic">{alt}</p>}
+                        </div>
+                      );
+                    }
+
+                    if (!isValidUrl(imageSrc)) {
+                      return (
+                        <div className="my-6 p-4 bg-gray-100 rounded-lg text-center text-gray-500">
+                          <p>图片加载失败: {imageSrc}</p>
+                          {alt && <p className="text-sm mt-1 italic">{alt}</p>}
+                        </div>
+                      );
+                    }
+
+                    return (
+                      <div className="my-6">
+                        <Image
+                          src={imageSrc}
+                          alt={(alt as string) || ""}
+                          width={800}
+                          height={400}
+                          className="rounded-lg shadow-md w-full h-auto"
+                          {...restProps}
+                        />
+                        {alt && (
+                          <p className="text-sm text-gray-500 text-center mt-2 italic">
+                            {alt}
+                          </p>
+                        )}
+                      </div>
+                    );
+                  },
                   // 自定义代码块渲染
                   // eslint-disable-next-line @typescript-eslint/no-explicit-any
                   code: ({ inline, className, children, ...props }: any) => {

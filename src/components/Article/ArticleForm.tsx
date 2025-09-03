@@ -2,14 +2,10 @@
 
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import ReactMarkdown from "react-markdown";
-import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
-import { tomorrow } from "react-syntax-highlighter/dist/esm/styles/prism";
-import remarkGfm from "remark-gfm";
-import rehypeRaw from "rehype-raw";
 import { createArticleSchema, updateArticleSchema } from "@/lib/validations";
 import type { ArticleWithTags } from "@/types/database";
 import { z } from "zod";
+import { MarkdownEditor } from "@/components";
 
 interface Tag {
   id: string;
@@ -37,7 +33,6 @@ export default function ArticleForm({
 }: ArticleFormProps) {
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
-  const [isPreview, setIsPreview] = useState(false);
   const [availableTags, setAvailableTags] = useState<Tag[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
@@ -338,90 +333,17 @@ export default function ArticleForm({
 
         {/* 内容编辑器 */}
         <div>
-          <div className="flex items-center justify-between mb-2">
-            <label className="block text-sm font-medium text-gray-700">
-              文章内容 * (支持 Markdown)
-            </label>
-            <div className="flex space-x-2">
-              <button
-                type="button"
-                onClick={() => setIsPreview(false)}
-                className={`px-3 py-1 text-sm rounded ${
-                  !isPreview
-                    ? "bg-blue-100 text-blue-700"
-                    : "bg-gray-100 text-gray-600 hover:bg-gray-200"
-                }`}
-              >
-                编辑
-              </button>
-              <button
-                type="button"
-                onClick={() => setIsPreview(true)}
-                className={`px-3 py-1 text-sm rounded ${
-                  isPreview
-                    ? "bg-blue-100 text-blue-700"
-                    : "bg-gray-100 text-gray-600 hover:bg-gray-200"
-                }`}
-              >
-                预览
-              </button>
-            </div>
-          </div>
-
-          <div
-            className={`border rounded-md ${
-              fieldErrors.content ? "border-red-300" : "border-gray-300"
-            }`}
-          >
-            {!isPreview ? (
-              <textarea
-                value={formData.content}
-                onChange={(e) => handleInputChange("content", e.target.value)}
-                rows={20}
-                className={`w-full px-4 py-3 border-0 rounded-md resize-none focus:ring-2 focus:border-transparent ${
-                  fieldErrors.content
-                    ? "focus:ring-red-500"
-                    : "focus:ring-blue-500"
-                }`}
-                placeholder="在这里撰写你的文章内容... 支持 Markdown 语法"
-              />
-            ) : (
-              <div className="min-h-[500px] p-4 prose prose-lg max-w-none">
-                <ReactMarkdown
-                  remarkPlugins={[remarkGfm]}
-                  rehypePlugins={[rehypeRaw]}
-                  components={{
-                    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                    code: ({ inline, className, children, ...props }: any) => {
-                      const match = /language-(\w+)/.exec(className || "");
-                      const language = match ? match[1] : "";
-
-                      return !inline ? (
-                        <SyntaxHighlighter
-                          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                          style={tomorrow as any}
-                          language={language}
-                          PreTag="div"
-                          className="rounded-lg my-4"
-                          {...props}
-                        >
-                          {String(children).replace(/\n$/, "")}
-                        </SyntaxHighlighter>
-                      ) : (
-                        <code
-                          className="bg-gray-100 text-red-600 px-1 py-0.5 rounded text-sm"
-                          {...props}
-                        >
-                          {children}
-                        </code>
-                      );
-                    },
-                  }}
-                >
-                  {formData.content || "*预览内容将在这里显示...*"}
-                </ReactMarkdown>
-              </div>
-            )}
+          <label className="block text-sm font-medium text-gray-700 mb-2">
+            文章内容 * (支持 Markdown、图片上传、数学公式)
+          </label>
+          <div className={fieldErrors.content ? "border-red-300" : ""}>
+            <MarkdownEditor
+              value={formData.content}
+              onChange={(value) => handleInputChange("content", value)}
+              placeholder="在这里撰写你的文章内容... 支持 Markdown 语法、图片上传、数学公式等"
+              height="h-[600px]"
+              className={fieldErrors.content ? "border-red-300" : ""}
+            />
           </div>
           {fieldErrors.content && (
             <p className="mt-1 text-sm text-red-600">{fieldErrors.content}</p>

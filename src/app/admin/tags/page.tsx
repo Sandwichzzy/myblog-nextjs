@@ -1,5 +1,5 @@
 import { getAllTags } from "@/lib/tags";
-import TagManagement from "@/components/TagManagement";
+import TagManagement from "@/components/Tag/TagManagement";
 
 export default async function TagsManagePage() {
   // 获取所有标签

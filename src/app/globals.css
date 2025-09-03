@@ -1,5 +1,5 @@
 @import "tailwindcss";
-
+@import "katex/dist/katex.min.css";
 /* 加载 Typography 插件 */
 @plugin "@tailwindcss/typography";
 
