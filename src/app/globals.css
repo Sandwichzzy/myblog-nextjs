@@ -459,6 +459,45 @@ body::before {
   }
 }
 
+/* 列表标记样式优化 */
+.prose ul,
+.prose ol {
+  list-style-position: outside;
+  padding-left: 1.5rem;
+}
+
+.prose li {
+  position: relative;
+  padding-left: 0;
+  margin-top: 0.25rem;
+  margin-bottom: 0.25rem;
+}
+
+.prose li::marker {
+  color: var(--text-secondary);
+  font-weight: normal;
+  white-space: nowrap;
+}
+
+.prose ul li::marker {
+  content: "•";
+}
+
+.prose ol li::marker {
+  font-feature-settings: "tnum";
+  font-variant-numeric: tabular-nums;
+}
+
+/* 确保嵌套列表的正确缩进 */
+.prose ul ul,
+.prose ol ul,
+.prose ul ol,
+.prose ol ol {
+  margin-top: 0.25rem;
+  margin-bottom: 0.25rem;
+  padding-left: 1.5rem;
+}
+
 /* 减少动画模式支持 */
 @media (prefers-reduced-motion: reduce) {
   *,

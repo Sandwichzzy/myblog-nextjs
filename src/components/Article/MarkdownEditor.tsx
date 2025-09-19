@@ -211,8 +211,27 @@ export default function MarkdownEditor({
             className="w-full h-full p-4 border-none outline-none resize-none font-mono text-sm leading-relaxed text-gray-900 bg-white"
           />
         ) : (
-          <div className="h-full overflow-y-auto p-4 bg-gray-50">
-            <div className="prose prose-lg max-w-none">
+          <div className="h-full overflow-y-auto p-4 bg-gray-900">
+            <div
+              className="prose prose-xl max-w-none 
+              prose-headings:text-gray-100 prose-headings:font-bold
+              prose-p:text-gray-200 prose-p:leading-relaxed prose-p:mb-4 
+              prose-a:text-blue-400 prose-a:no-underline hover:prose-a:text-blue-300 hover:prose-a:underline 
+              prose-strong:text-white prose-strong:font-semibold
+              prose-blockquote:text-gray-300 prose-blockquote:border-blue-400 prose-blockquote:bg-blue-900/20 prose-blockquote:rounded-r
+              prose-li:text-gray-200 prose-li:my-1
+              prose-code:text-pink-400 prose-code:bg-gray-800 prose-code:px-1 prose-code:py-0.5 prose-code:rounded
+              prose-pre:bg-gray-900 prose-pre:text-gray-100 prose-pre:border prose-pre:border-gray-700
+              prose-th:text-gray-100 prose-th:bg-gray-800 prose-th:border-gray-600
+              prose-td:text-gray-200 prose-td:border-gray-600
+              prose-hr:border-gray-600
+              prose-ul:text-gray-200 prose-ul:list-disc prose-ul:pl-6
+              prose-ol:text-gray-200 prose-ol:list-decimal prose-ol:pl-6
+              [&_li]:relative [&_li]:pl-0 [&_li::marker]:text-gray-400 [&_li::marker]:font-normal"
+              style={{
+                listStylePosition: "outside",
+              }}
+            >
               <ReactMarkdown
                 remarkPlugins={[remarkGfm, remarkMath]}
                 rehypePlugins={[rehypeRaw, rehypeKatex]}
@@ -225,10 +244,14 @@ export default function MarkdownEditor({
 
                     if (!imageSrc || imageSrc.trim() === "") {
                       return (
-                        <div className="my-4 p-4 bg-gray-100 rounded-lg text-center text-gray-500">
-                          <p>图片路径为空</p>
-                          {alt && <p className="text-sm mt-1 italic">{alt}</p>}
-                        </div>
+                        <span className="block my-4 p-4 bg-gray-800 rounded-lg text-center text-gray-400">
+                          <span className="block">图片路径为空</span>
+                          {alt && (
+                            <span className="block text-sm mt-1 italic">
+                              {alt}
+                            </span>
+                          )}
+                        </span>
                       );
                     }
 
@@ -247,15 +270,21 @@ export default function MarkdownEditor({
 
                     if (!isValidUrl(imageSrc)) {
                       return (
-                        <div className="my-4 p-4 bg-gray-100 rounded-lg text-center text-gray-500">
-                          <p>图片加载失败: {imageSrc}</p>
-                          {alt && <p className="text-sm mt-1 italic">{alt}</p>}
-                        </div>
+                        <span className="block my-4 p-4 bg-gray-800 rounded-lg text-center text-gray-400">
+                          <span className="block">
+                            图片加载失败: {imageSrc}
+                          </span>
+                          {alt && (
+                            <span className="block text-sm mt-1 italic">
+                              {alt}
+                            </span>
+                          )}
+                        </span>
                       );
                     }
 
                     return (
-                      <div className="my-4">
+                      <span className="block my-4">
                         <Image
                           src={imageSrc}
                           alt={(alt as string) || ""}
@@ -265,11 +294,11 @@ export default function MarkdownEditor({
                           {...restProps}
                         />
                         {alt && (
-                          <p className="text-sm text-gray-500 text-center mt-2 italic">
+                          <span className="block text-sm text-gray-400 text-center mt-2 italic">
                             {alt}
-                          </p>
+                          </span>
                         )}
-                      </div>
+                      </span>
                     );
                   },
                   // 自定义代码块渲染
@@ -283,7 +312,7 @@ export default function MarkdownEditor({
                         // eslint-disable-next-line @typescript-eslint/no-explicit-any
                         style={tomorrow as any}
                         language={language}
-                        PreTag="div"
+                        PreTag="pre"
                         className="rounded-lg my-4"
                         {...props}
                       >
@@ -291,7 +320,7 @@ export default function MarkdownEditor({
                       </SyntaxHighlighter>
                     ) : (
                       <code
-                        className="bg-gray-100 text-red-600 px-1 py-0.5 rounded text-sm"
+                        className="bg-gray-800 text-pink-400 px-1 py-0.5 rounded text-sm"
                         {...props}
                       >
                         {children}

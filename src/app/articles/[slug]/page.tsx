@@ -136,35 +136,42 @@ export default async function ArticleDetailPage({ params }: PageProps) {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gradient-to-br from-gray-900 via-blue-900 to-purple-900">
+      {/* 背景装饰效果 */}
+      <div className="absolute inset-0 overflow-hidden pointer-events-none">
+        <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-blue-500/10 rounded-full blur-3xl animate-pulse"></div>
+        <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-purple-500/10 rounded-full blur-3xl animate-pulse delay-1000"></div>
+        <div className="absolute top-3/4 left-1/2 w-64 h-64 bg-pink-500/10 rounded-full blur-2xl animate-pulse delay-500"></div>
+      </div>
+
       {/* 注入 JSON-LD 结构化数据 */}
       <script
         type="application/ld+json"
         suppressHydrationWarning
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
       />
-      <article className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <article className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* 文章头部 */}
         <header className="mb-8">
           {/* 面包屑导航 */}
-          <nav className="flex items-center space-x-2 text-sm text-gray-500 mb-6">
+          <nav className="flex items-center space-x-2 text-sm text-gray-300 mb-6">
             <BreadcrumbLink href="/">首页</BreadcrumbLink>
             <span>/</span>
             <BreadcrumbLink href="/articles">文章</BreadcrumbLink>
             <span>/</span>
-            <span className="text-gray-900">{article.title}</span>
+            <span className="text-white">{article.title}</span>
           </nav>
 
           {/* 文章标题 */}
-          <h1 className="text-3xl sm:text-4xl font-bold text-gray-900 mb-6 leading-tight">
-            {article.title}
+          <h1 className="text-3xl sm:text-4xl font-bold mb-6 leading-tight">
+            <span className="gradient-text">{article.title}</span>
           </h1>
 
           {/* 文章元信息 */}
-          <div className="flex flex-wrap items-center gap-4 text-sm text-gray-600 mb-6">
+          <div className="flex flex-wrap items-center gap-4 text-sm text-gray-300 mb-6">
             <div className="flex items-center space-x-2">
               <svg
-                className="w-4 h-4"
+                className="w-4 h-4 text-blue-400"
                 fill="none"
                 stroke="currentColor"
                 viewBox="0 0 24 24"
@@ -181,7 +188,7 @@ export default async function ArticleDetailPage({ params }: PageProps) {
 
             <div className="flex items-center space-x-2">
               <svg
-                className="w-4 h-4"
+                className="w-4 h-4 text-purple-400"
                 fill="none"
                 stroke="currentColor"
                 viewBox="0 0 24 24"
@@ -199,12 +206,17 @@ export default async function ArticleDetailPage({ params }: PageProps) {
                   d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"
                 />
               </svg>
-              <span>{article.view_count} 次浏览</span>
+              <span>
+                <span className="neon-text font-semibold">
+                  {article.view_count}
+                </span>{" "}
+                次浏览
+              </span>
             </div>
 
             <div className="flex items-center space-x-2">
               <svg
-                className="w-4 h-4"
+                className="w-4 h-4 text-pink-400"
                 fill="none"
                 stroke="currentColor"
                 viewBox="0 0 24 24"
@@ -216,7 +228,13 @@ export default async function ArticleDetailPage({ params }: PageProps) {
                   d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
                 />
               </svg>
-              <span>约 {calculateReadingTime(article.content)} 分钟阅读</span>
+              <span>
+                约{" "}
+                <span className="neon-text font-semibold">
+                  {calculateReadingTime(article.content)}
+                </span>{" "}
+                分钟阅读
+              </span>
             </div>
           </div>
 
@@ -235,9 +253,28 @@ export default async function ArticleDetailPage({ params }: PageProps) {
         </header>
 
         {/* 文章内容 */}
-        <div className="bg-white rounded-lg shadow-md overflow-hidden mb-8">
-          <div className="p-8">
-            <div className="prose prose-lg max-w-none prose-headings:text-gray-900 prose-p:text-gray-700 prose-p:leading-relaxed prose-p:mb-4 prose-a:text-blue-600 prose-a:no-underline hover:prose-a:underline prose-strong:text-gray-900 prose-blockquote:text-gray-600 prose-blockquote:border-blue-200 prose-li:text-gray-700 prose-pre:bg-gray-900 prose-pre:text-gray-100">
+        <div className="web3-card overflow-hidden mb-8">
+          <div className="p-8 lg:p-12">
+            <div
+              className="prose prose-xl max-w-none 
+              prose-headings:text-gray-100 prose-headings:font-bold
+              prose-p:text-gray-200 prose-p:leading-relaxed prose-p:mb-4 
+              prose-a:text-blue-400 prose-a:no-underline hover:prose-a:text-blue-300 hover:prose-a:underline 
+              prose-strong:text-white prose-strong:font-semibold
+              prose-blockquote:text-gray-300 prose-blockquote:border-blue-400 prose-blockquote:bg-blue-900/20 prose-blockquote:rounded-r
+              prose-li:text-gray-200 prose-li:my-1
+              prose-code:text-pink-400 prose-code:bg-gray-800 prose-code:px-1 prose-code:py-0.5 prose-code:rounded
+              prose-pre:bg-gray-900 prose-pre:text-gray-100 prose-pre:border prose-pre:border-gray-700
+              prose-th:text-gray-100 prose-th:bg-gray-800 prose-th:border-gray-600
+              prose-td:text-gray-200 prose-td:border-gray-600
+              prose-hr:border-gray-600
+              prose-ul:text-gray-200 prose-ul:list-disc prose-ul:pl-6
+              prose-ol:text-gray-200 prose-ol:list-decimal prose-ol:pl-6
+              [&_li]:relative [&_li]:pl-0 [&_li::marker]:text-gray-400 [&_li::marker]:font-normal"
+              style={{
+                listStylePosition: "outside",
+              }}
+            >
               <ReactMarkdown
                 remarkPlugins={[remarkGfm, remarkMath]}
                 rehypePlugins={[rehypeRaw, rehypeKatex]}
@@ -266,24 +303,34 @@ export default async function ArticleDetailPage({ params }: PageProps) {
                     // 如果没有src或src为空，直接返回错误提示
                     if (!imageSrc || imageSrc.trim() === "") {
                       return (
-                        <div className="my-6 p-4 bg-gray-100 rounded-lg text-center text-gray-500">
-                          <p>图片路径为空</p>
-                          {alt && <p className="text-sm mt-1 italic">{alt}</p>}
-                        </div>
+                        <span className="block my-6 p-4 bg-gray-100 rounded-lg text-center text-gray-500">
+                          <span className="block">图片路径为空</span>
+                          {alt && (
+                            <span className="block text-sm mt-1 italic">
+                              {alt}
+                            </span>
+                          )}
+                        </span>
                       );
                     }
 
                     if (!isValidUrl(imageSrc)) {
                       return (
-                        <div className="my-6 p-4 bg-gray-100 rounded-lg text-center text-gray-500">
-                          <p>图片加载失败: {imageSrc}</p>
-                          {alt && <p className="text-sm mt-1 italic">{alt}</p>}
-                        </div>
+                        <span className="block my-6 p-4 bg-gray-100 rounded-lg text-center text-gray-500">
+                          <span className="block">
+                            图片加载失败: {imageSrc}
+                          </span>
+                          {alt && (
+                            <span className="block text-sm mt-1 italic">
+                              {alt}
+                            </span>
+                          )}
+                        </span>
                       );
                     }
 
                     return (
-                      <div className="my-6">
+                      <span className="block my-6">
                         <Image
                           src={imageSrc}
                           alt={(alt as string) || ""}
@@ -293,11 +340,11 @@ export default async function ArticleDetailPage({ params }: PageProps) {
                           {...restProps}
                         />
                         {alt && (
-                          <p className="text-sm text-gray-500 text-center mt-2 italic">
+                          <span className="block text-sm text-gray-400 text-center mt-2 italic">
                             {alt}
-                          </p>
+                          </span>
                         )}
-                      </div>
+                      </span>
                     );
                   },
                   // 自定义代码块渲染
@@ -311,7 +358,7 @@ export default async function ArticleDetailPage({ params }: PageProps) {
                         // eslint-disable-next-line @typescript-eslint/no-explicit-any
                         style={tomorrow as any}
                         language={language}
-                        PreTag="div"
+                        PreTag="pre"
                         className="rounded-lg my-4"
                         {...props}
                       >
@@ -319,7 +366,7 @@ export default async function ArticleDetailPage({ params }: PageProps) {
                       </SyntaxHighlighter>
                     ) : (
                       <code
-                        className="bg-gray-100 text-red-600 px-1 py-0.5 rounded text-sm"
+                        className="bg-gray-800 text-pink-400 px-1 py-0.5 rounded text-sm"
                         {...props}
                       >
                         {children}
@@ -328,33 +375,33 @@ export default async function ArticleDetailPage({ params }: PageProps) {
                   },
                   // 自定义标题渲染
                   h1: ({ children }) => (
-                    <h1 className="text-3xl font-bold text-gray-900 mb-6 mt-8 border-b border-gray-200 pb-2">
+                    <h1 className="text-3xl font-bold text-gray-100 mb-6 mt-8 border-b border-gray-600 pb-2">
                       {children}
                     </h1>
                   ),
                   h2: ({ children }) => (
-                    <h2 className="text-2xl font-bold text-gray-900 mb-4 mt-6">
+                    <h2 className="text-2xl font-bold text-gray-100 mb-4 mt-6">
                       {children}
                     </h2>
                   ),
                   h3: ({ children }) => (
-                    <h3 className="text-xl font-bold text-gray-900 mb-3 mt-4">
+                    <h3 className="text-xl font-bold text-gray-100 mb-3 mt-4">
                       {children}
                     </h3>
                   ),
                   ul: ({ children }) => (
-                    <ul className="list-disc list-inside text-gray-700 mb-4 space-y-1">
+                    <ul className="list-disc list-inside text-gray-200 mb-4 space-y-1">
                       {children}
                     </ul>
                   ),
                   ol: ({ children }) => (
-                    <ol className="list-decimal list-inside text-gray-700 mb-4 space-y-1">
+                    <ol className="list-decimal list-inside text-gray-200 mb-4 space-y-1">
                       {children}
                     </ol>
                   ),
                   // 自定义引用渲染
                   blockquote: ({ children }) => (
-                    <blockquote className="border-l-4 border-blue-200 bg-blue-50 p-4 my-4 italic text-gray-600">
+                    <blockquote className="border-l-4 border-blue-400 bg-blue-900/20 p-4 my-4 italic text-gray-300 rounded-r">
                       {children}
                     </blockquote>
                   ),
@@ -362,7 +409,7 @@ export default async function ArticleDetailPage({ params }: PageProps) {
                   a: ({ href, children }) => (
                     <a
                       href={href}
-                      className="text-blue-600 hover:text-blue-800 hover:underline"
+                      className="text-blue-400 hover:text-blue-300 hover:underline transition-colors"
                       target={href?.startsWith("http") ? "_blank" : undefined}
                       rel={
                         href?.startsWith("http")
@@ -376,18 +423,18 @@ export default async function ArticleDetailPage({ params }: PageProps) {
                   // 自定义表格渲染
                   table: ({ children }) => (
                     <div className="overflow-x-auto my-6">
-                      <table className="min-w-full border-collapse border border-gray-300">
+                      <table className="min-w-full border-collapse border border-gray-600">
                         {children}
                       </table>
                     </div>
                   ),
                   th: ({ children }) => (
-                    <th className="border border-gray-300 bg-gray-50 px-4 py-2 text-left font-medium text-gray-900">
+                    <th className="border border-gray-600 bg-gray-800 px-4 py-2 text-left font-medium text-gray-100">
                       {children}
                     </th>
                   ),
                   td: ({ children }) => (
-                    <td className="border border-gray-300 px-4 py-2 text-gray-700">
+                    <td className="border border-gray-600 px-4 py-2 text-gray-200">
                       {children}
                     </td>
                   ),
@@ -400,17 +447,25 @@ export default async function ArticleDetailPage({ params }: PageProps) {
         </div>
 
         {/* 文章底部信息 */}
-        <footer className="border-t border-gray-200 pt-8 mb-12">
+        <footer className="border-t border-gray-600 pt-8 mb-12">
           <div className="flex justify-between items-center">
-            <div className="text-sm text-gray-600">
-              最后更新: {formatDate(article.updated_at)}
+            <div className="text-sm text-gray-300">
+              最后更新:{" "}
+              <span className="neon-text">
+                {formatDate(article.updated_at)}
+              </span>
             </div>
             <FooterButtons />
           </div>
         </footer>
 
         {/* 评论区域 */}
-        <section className="border-t border-gray-200 pt-12">
+        <section className="border-t border-gray-600 pt-12">
+          <div className="mb-6">
+            <h2 className="text-2xl font-bold">
+              <span className="gradient-text">评论区</span>
+            </h2>
+          </div>
           <ArticleComments
             articleId={article.id}
             initialComments={initialComments}

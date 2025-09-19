@@ -219,7 +219,7 @@ export default async function ArticlePreviewPage({ params }: PageProps) {
                           // eslint-disable-next-line @typescript-eslint/no-explicit-any
                           style={tomorrow as any}
                           language={language}
-                          PreTag="div"
+                          PreTag="pre"
                           className="rounded-lg my-4"
                           {...props}
                         >
