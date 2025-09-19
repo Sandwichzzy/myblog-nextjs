@@ -120,7 +120,7 @@ export default function CommentManagementServer({
       {/* 头部操作区 */}
       <div className="flex items-center justify-between">
         <div className="flex items-center space-x-4">
-          <h2 className="text-xl font-semibold text-gray-900">
+          <h2 className="text-xl font-semibold text-gray-300">
             待审核评论 ({totalCount})
           </h2>
         </div>
@@ -170,7 +170,7 @@ export default function CommentManagementServer({
       {/* 评论列表 */}
       {comments.length === 0 ? (
         <div className="text-center py-8">
-          <p className="text-gray-500">暂无待审核评论</p>
+          <p className="text-gray-300">暂无待审核评论</p>
         </div>
       ) : (
         <div className="bg-white border border-gray-200 rounded-lg overflow-hidden">
@@ -190,41 +190,45 @@ export default function CommentManagementServer({
           </div>
 
           {/* 评论项 */}
-          <div className="divide-y divide-gray-200">
+
+          <div className="divide-y divide-gray-600">
             {comments.map((comment) => (
-              <div key={comment.id} className="p-6 hover:bg-gray-50">
+              <div
+                key={comment.id}
+                className="p-6 hover:bg-gray-700/20 transition-colors"
+              >
                 <div className="flex items-start space-x-4">
                   {/* 选择框 */}
                   <input
                     type="checkbox"
                     checked={selectedComments.includes(comment.id)}
                     onChange={() => toggleCommentSelection(comment.id)}
-                    className="mt-1 h-4 w-4 text-blue-600 rounded border-gray-300"
+                    className="mt-1 h-4 w-4 text-blue-400 rounded border-gray-600 bg-gray-700 focus:ring-blue-500"
                   />
 
                   {/* 头像 */}
-                  <div className="w-10 h-10 bg-gradient-to-br from-blue-400 to-purple-500 rounded-full flex items-center justify-center text-white font-semibold text-sm">
+                  <div className="w-10 h-10 bg-gradient-to-br from-blue-400 to-purple-500 rounded-full flex items-center justify-center text-white font-semibold text-sm shadow-lg">
                     {comment.author_name[0].toUpperCase()}
                   </div>
 
                   {/* 评论内容 */}
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center space-x-2 mb-2">
-                      <h4 className="text-sm font-medium text-gray-900">
+                      <h4 className="text-sm font-medium text-gray-100">
                         {comment.author_name}
                       </h4>
                       {comment.author_email && (
-                        <span className="text-xs text-gray-500">
+                        <span className="text-xs text-gray-400">
                           {comment.author_email}
                         </span>
                       )}
-                      <span className="text-xs text-gray-500">
+                      <span className="text-xs text-gray-400">
                         {formatDate(comment.created_at)}
                       </span>
                     </div>
 
                     {/* 评论内容 */}
-                    <div className="text-sm text-gray-700 whitespace-pre-wrap break-words mb-3">
+                    <div className="text-sm text-gray-200 whitespace-pre-wrap break-words mb-3 bg-gray-800/30 p-3 rounded-md border border-gray-600/50">
                       {comment.content}
                     </div>
 

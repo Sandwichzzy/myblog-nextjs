@@ -253,66 +253,68 @@ export default function CommentManagement({
           </div>
         )}
       </div>
-
       {/* 评论列表 */}
       {comments.length === 0 ? (
         <div className="text-center py-8">
-          <p className="text-gray-500">暂无评论</p>
+          <p className="text-gray-400">暂无评论</p>
         </div>
       ) : (
-        <div className="bg-white border border-gray-200 rounded-lg overflow-hidden">
+        <div className="web3-card overflow-hidden">
           {/* 表头 */}
-          <div className="bg-gray-50 px-6 py-3 border-b border-gray-200">
+          <div className="bg-gray-800/50 px-6 py-3 border-b border-gray-600">
             <div className="flex items-center">
               <input
                 type="checkbox"
                 checked={selectedComments.length === comments.length}
                 onChange={toggleSelectAll}
-                className="h-4 w-4 text-blue-600 rounded border-gray-300"
+                className="h-4 w-4 text-blue-400 rounded border-gray-600 bg-gray-700 focus:ring-blue-500"
               />
-              <span className="ml-3 text-sm font-medium text-gray-900">
+              <span className="ml-3 text-sm font-medium text-gray-300">
                 全选
               </span>
             </div>
           </div>
 
           {/* 评论项 */}
-          <div className="divide-y divide-gray-200">
+          <div className="divide-y divide-gray-600">
             {comments.map((comment) => (
-              <div key={comment.id} className="p-6 hover:bg-gray-50">
+              <div
+                key={comment.id}
+                className="p-6 hover:bg-gray-700/20 transition-colors"
+              >
                 <div className="flex items-start space-x-4">
                   {/* 选择框 */}
                   <input
                     type="checkbox"
                     checked={selectedComments.includes(comment.id)}
                     onChange={() => toggleCommentSelection(comment.id)}
-                    className="mt-1 h-4 w-4 text-blue-600 rounded border-gray-300"
+                    className="mt-1 h-4 w-4 text-blue-400 rounded border-gray-600 bg-gray-700 focus:ring-blue-500"
                   />
 
                   {/* 头像 */}
-                  <div className="w-10 h-10 bg-gradient-to-br from-blue-400 to-purple-500 rounded-full flex items-center justify-center text-white font-semibold text-sm">
+                  <div className="w-10 h-10 bg-gradient-to-br from-blue-400 to-purple-500 rounded-full flex items-center justify-center text-white font-semibold text-sm shadow-lg">
                     {comment.author_name[0].toUpperCase()}
                   </div>
 
                   {/* 评论内容 */}
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center space-x-2 mb-2">
-                      <h4 className="text-sm font-medium text-gray-900">
+                      <h4 className="text-sm font-medium text-gray-100">
                         {comment.author_name}
                       </h4>
                       {comment.author_email && (
-                        <span className="text-xs text-gray-500">
+                        <span className="text-xs text-gray-400">
                           {comment.author_email}
                         </span>
                       )}
-                      <span className="text-xs text-gray-500">
+                      <span className="text-xs text-gray-400">
                         {formatDate(comment.created_at)}
                       </span>
                       <span
                         className={`px-2 py-1 text-xs rounded-full ${
                           comment.published
-                            ? "bg-green-100 text-green-800"
-                            : "bg-yellow-100 text-yellow-800"
+                            ? "bg-green-900/30 text-green-300 border border-green-400/30"
+                            : "bg-yellow-900/30 text-yellow-300 border border-yellow-400/30"
                         }`}
                       >
                         {comment.published ? "已发布" : "待审核"}
@@ -321,13 +323,13 @@ export default function CommentManagement({
 
                     {/* 文章标题 */}
                     {comment.article_title && (
-                      <p className="text-xs text-blue-600 mb-2">
+                      <p className="text-xs text-blue-400 mb-2">
                         评论文章: {comment.article_title}
                       </p>
                     )}
 
                     {/* 评论内容 */}
-                    <div className="text-sm text-gray-700 whitespace-pre-wrap break-words mb-3">
+                    <div className="text-sm text-gray-200 whitespace-pre-wrap break-words mb-3 bg-gray-800/30 p-3 rounded-md border border-gray-600/50">
                       {comment.content}
                     </div>
 
@@ -337,7 +339,7 @@ export default function CommentManagement({
                         <button
                           onClick={() => moderateComment(comment.id, "approve")}
                           disabled={actionLoading === comment.id}
-                          className="px-3 py-1 text-xs bg-green-600 text-white rounded hover:bg-green-700 disabled:opacity-50"
+                          className="px-3 py-1 text-xs bg-gradient-to-r from-green-600 to-emerald-600 text-white rounded hover:from-green-700 hover:to-emerald-700 disabled:opacity-50 transition-all"
                         >
                           {actionLoading === comment.id ? "处理中..." : "通过"}
                         </button>
@@ -345,7 +347,7 @@ export default function CommentManagement({
                       <button
                         onClick={() => moderateComment(comment.id, "reject")}
                         disabled={actionLoading === comment.id}
-                        className="px-3 py-1 text-xs bg-red-600 text-white rounded hover:bg-red-700 disabled:opacity-50"
+                        className="px-3 py-1 text-xs bg-gradient-to-r from-red-600 to-pink-600 text-white rounded hover:from-red-700 hover:to-pink-700 disabled:opacity-50 transition-all"
                       >
                         {actionLoading === comment.id ? "处理中..." : "删除"}
                       </button>
