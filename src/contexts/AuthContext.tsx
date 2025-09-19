@@ -113,10 +113,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
       if (authUser) {
         try {
+          console.log("开始检查管理员状态...");
           const adminStatus = await isUserAdmin(authUser.id);
           if (mounted) {
             setIsAdmin(adminStatus);
-            console.log("管理员状态:", adminStatus);
+            console.log("管理员状态检查完成:", adminStatus);
           }
         } catch (error) {
           console.error("检查管理员状态失败:", error);
@@ -144,27 +145,40 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
       // 如果还没有初始化，这是初始化过程
       if (!hasInitialized) {
+        console.log("这是初始化过程，完成初始化...");
         completeInitialization(authUser);
-        await updateUserState(authUser);
+
+        // 异步更新用户状态，不阻塞初始化
+        if (authUser) {
+          updateUserState(authUser).catch((error) => {
+            console.error("异步更新用户状态失败:", error);
+          });
+        }
       } else {
         // 如果已经初始化，这是状态变化
+        console.log("这是状态变化，更新用户状态...");
         setUser(authUser);
         await updateUserState(authUser);
       }
     });
 
-    // 设置超时保护 - 如果10秒内没有初始化完成，强制结束加载
+    // 设置超时保护 - 如果15秒内没有初始化完成，强制结束加载
     const timeoutId = setTimeout(() => {
       if (!hasInitialized && mounted) {
-        console.warn("认证状态初始化超时，强制结束加载状态");
-        console.warn("可能原因:");
-        console.warn("1. 网络连接问题");
-        console.warn("2. Supabase配置错误");
-        console.warn("3. localStorage中的token已过期");
+        console.warn("❌ 认证状态初始化超时，强制结束加载状态");
+        console.warn("🔍 可能原因:");
+        console.warn("  1. 网络连接问题");
+        console.warn("  2. Supabase配置错误");
+        console.warn("  3. localStorage中的token已过期");
+        console.warn("  4. 数据库查询超时");
+        console.warn("💡 建议:");
+        console.warn("  - 检查网络连接");
+        console.warn("  - 清除浏览器localStorage后重新登录");
+        console.warn("  - 检查Supabase项目状态");
         hasInitialized = true;
         setIsLoading(false);
       }
-    }, 10000); // 10秒超时
+    }, 15000); // 15秒超时
 
     // 清理函数
     return () => {

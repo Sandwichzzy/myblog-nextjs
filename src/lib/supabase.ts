@@ -9,8 +9,8 @@ export const supabase = createClient<Database>(supabaseUrl, supabaseAnonKey, {
     persistSession: true,
     autoRefreshToken: true,
     // 设置session过期时间（默认1小时）
-    storageKey: "supabase.auth.token",
-    // 检测session变化
+    // storageKey: "supabase.auth.token",
+    // 让Supabase使用默认的现代存储机制
     detectSessionInUrl: true,
   },
   // 全局选项

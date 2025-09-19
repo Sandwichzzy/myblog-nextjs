@@ -136,20 +136,34 @@ export async function getUserProfile(
 ): Promise<UserProfile | null> {
   console.log(`获取用户 ${userId} 的配置`);
 
-  // 使用管理员客户端查询用户配置，确保能绕过 RLS 策略
-  const { data, error } = await supabase
-    .from("user_profiles")
-    .select("*")
-    .eq("id", userId)
-    .maybeSingle();
+  try {
+    // 添加超时保护
+    const timeoutPromise = new Promise<null>((_, reject) => {
+      setTimeout(() => reject(new Error("获取用户配置超时")), 8000); // 8秒超时
+    });
 
-  if (error) {
-    console.error("获取用户配置失败:", error);
+    const profilePromise = supabase
+      .from("user_profiles")
+      .select("*")
+      .eq("id", userId)
+      .maybeSingle();
+
+    // 使用Promise.race实现超时
+    const result = await Promise.race([profilePromise, timeoutPromise]);
+    if (!result) throw new Error("获取用户配置超时");
+    const { data, error } = result;
+
+    if (error) {
+      console.error("获取用户配置失败:", error);
+      return null;
+    }
+
+    console.log("获取用户配置结果:", data);
+    return data;
+  } catch (error) {
+    console.error("获取用户配置异常:", error);
     return null;
   }
-
-  console.log("获取用户配置结果:", data);
-  return data;
 }
 
 /**
@@ -252,12 +266,21 @@ export async function isUserAdmin(userId?: string): Promise<boolean> {
 
     console.log(`检查用户 ${userId} 的管理员权限`);
 
-    // 查询用户配置
-    const { data, error } = await supabase
+    // 添加超时保护
+    const timeoutPromise = new Promise<null>((_, reject) => {
+      setTimeout(() => reject(new Error("检查管理员权限超时")), 5000); // 5秒超时
+    });
+
+    const adminCheckPromise = supabase
       .from("user_profiles")
       .select("role, is_active, display_name")
       .eq("id", userId)
       .maybeSingle();
+
+    // 使用Promise.race实现超时
+    const result = await Promise.race([adminCheckPromise, timeoutPromise]);
+    if (!result) throw new Error("检查管理员权限超时");
+    const { data, error } = result;
 
     if (error) {
       console.error("检查管理员权限失败:", error);
