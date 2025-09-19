@@ -128,6 +128,7 @@ async function handleGetArticle(
  *   "excerpt": "新摘要",
  *   "published": true,
  *   "tagIds": ["tag-uuid-1", "tag-uuid-2"]
+ *   "git_repo_url": "https://github.com/username/repository"
  * }
  *
  * 响应格式：
@@ -176,6 +177,7 @@ async function handleUpdateArticle(
     excerpt,
     published,
     tagIds,
+    git_repo_url,
   } = validatedData;
 
   // 6. 检查新slug的唯一性（如果有变更）
@@ -194,12 +196,14 @@ async function handleUpdateArticle(
     content: string;
     excerpt: string | null;
     published: boolean;
+    git_repo_url: string | null;
   }> = {};
   if (title !== undefined) updateData.title = title;
   if (newSlug !== undefined) updateData.slug = newSlug;
   if (content !== undefined) updateData.content = content;
   if (excerpt !== undefined) updateData.excerpt = excerpt;
   if (published !== undefined) updateData.published = published;
+  if (git_repo_url !== undefined) updateData.git_repo_url = git_repo_url;
 
   // 8. 更新文章
   const updatedArticle = await updateArticle(existingArticle.id, updateData);

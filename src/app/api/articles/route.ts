@@ -159,6 +159,7 @@ async function handleCreateArticle(req: NextRequest) {
     excerpt,
     published = false,
     tagIds = [],
+    git_repo_url,
   } = validatedData;
 
   // 4. 检查slug唯一性
@@ -183,6 +184,7 @@ async function handleCreateArticle(req: NextRequest) {
     content,
     excerpt: excerpt || null,
     published: published || false,
+    git_repo_url: git_repo_url || null,
     // author_id: user.id // 实际项目中从认证信息获取
   };
 
