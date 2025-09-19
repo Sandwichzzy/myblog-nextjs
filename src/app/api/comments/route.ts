@@ -6,7 +6,8 @@ import {
   createPaginatedResponse,
   extractQueryParams,
   parseJsonBody,
-  withCache,
+  withSmartCache,
+  CacheStrategies,
   withNoCache,
   getClientIP,
   checkRateLimit,
@@ -129,9 +130,9 @@ async function handleGetComments(req: NextRequest) {
   );
 
   // 5. 设置缓存策略
-  // 已发布评论缓存5分钟，未发布评论不缓存
+  // 已发布评论使用动态内容缓存策略，未发布评论不缓存
   if (published !== false) {
-    return withCache(response, 300, 600); // 5分钟缓存，10分钟stale-while-revalidate
+    return withSmartCache(response, CacheStrategies.DYNAMIC);
   }
 
   return withNoCache(response);

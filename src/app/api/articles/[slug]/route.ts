@@ -4,7 +4,8 @@ import {
   withMethodCheck,
   createSuccessResponse,
   parseJsonBody,
-  withCache,
+  withSmartCache,
+  CacheStrategies,
   getClientIP,
   checkRateLimit,
   ApiErrors,
@@ -106,9 +107,9 @@ async function handleGetArticle(
   const response = createSuccessResponse(article, "文章详情获取成功");
 
   // 6. 设置缓存策略
-  // 已发布文章缓存10分钟，未发布文章不缓存
+  // 已发布文章使用静态内容缓存策略，未发布文章不缓存
   if (article.published) {
-    return withCache(response, 600, 1800); // 10分钟缓存，30分钟stale-while-revalidate
+    return withSmartCache(response, CacheStrategies.STATIC);
   }
 
   return response;

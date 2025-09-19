@@ -329,7 +329,102 @@ export async function generateUniqueSlug(
 // ----------------------------------------------------------------------------
 
 /**
- * 设置响应缓存头
+ * 智能缓存配置 - 根据环境和数据类型自动调整
+ */
+interface CacheConfig {
+  // 开发环境缓存时间（秒）
+  dev: {
+    maxAge: number;
+    staleWhileRevalidate: number;
+  };
+  // 生产环境缓存时间（秒）
+  prod: {
+    maxAge: number;
+    staleWhileRevalidate: number;
+  };
+}
+
+/**
+ * 预定义的缓存配置策略
+ */
+export const CacheStrategies = {
+  // 静态内容：文章详情、页面内容等
+  STATIC: {
+    dev: { maxAge: 0, staleWhileRevalidate: 0 }, // 开发环境不缓存
+    prod: { maxAge: 600, staleWhileRevalidate: 1800 }, // 生产环境10分钟缓存
+  } as CacheConfig,
+
+  // 半静态内容：文章列表、标签列表等
+  SEMI_STATIC: {
+    dev: { maxAge: 0, staleWhileRevalidate: 0 }, // 开发环境不缓存
+    prod: { maxAge: 120, staleWhileRevalidate: 300 }, // 生产环境2分钟缓存
+  } as CacheConfig,
+
+  // 动态内容：评论、用户数据等
+  DYNAMIC: {
+    dev: { maxAge: 0, staleWhileRevalidate: 0 }, // 开发环境不缓存
+    prod: { maxAge: 60, staleWhileRevalidate: 180 }, // 生产环境1分钟缓存
+  } as CacheConfig,
+
+  // 频繁变化：搜索结果、实时数据等
+  FREQUENT: {
+    dev: { maxAge: 0, staleWhileRevalidate: 0 }, // 开发环境不缓存
+    prod: { maxAge: 30, staleWhileRevalidate: 90 }, // 生产环境30秒缓存
+  } as CacheConfig,
+
+  // 极少变化：配置数据、静态资源等
+  RARE_CHANGE: {
+    dev: { maxAge: 0, staleWhileRevalidate: 0 }, // 开发环境不缓存
+    prod: { maxAge: 3600, staleWhileRevalidate: 7200 }, // 生产环境1小时缓存
+  } as CacheConfig,
+};
+
+/**
+ * 智能设置响应缓存头 - 根据环境自动选择缓存策略
+ * @param response NextResponse对象
+ * @param strategy 缓存策略
+ * @param customConfig 自定义配置（可选）
+ * @returns 设置了缓存头的响应
+ */
+export function withSmartCache(
+  response: NextResponse,
+  strategy: CacheConfig = CacheStrategies.SEMI_STATIC,
+  customConfig?: Partial<CacheConfig>
+): NextResponse {
+  // 合并自定义配置
+  const config = customConfig
+    ? {
+        dev: { ...strategy.dev, ...customConfig.dev },
+        prod: { ...strategy.prod, ...customConfig.prod },
+      }
+    : strategy;
+
+  // 根据环境选择配置
+  const isDev = process.env.NODE_ENV === "development";
+  const cacheConfig = isDev ? config.dev : config.prod;
+
+  // 如果是开发环境或缓存时间为0，则不缓存
+  if (isDev || cacheConfig.maxAge === 0) {
+    return withNoCache(response);
+  }
+
+  // 设置生产环境缓存
+  response.headers.set(
+    "Cache-Control",
+    `public, max-age=${cacheConfig.maxAge}, s-maxage=${cacheConfig.maxAge}, stale-while-revalidate=${cacheConfig.staleWhileRevalidate}`
+  );
+
+  // 添加环境标识（便于调试）
+  response.headers.set(
+    "X-Cache-Strategy",
+    isDev ? "dev-no-cache" : "prod-cached"
+  );
+
+  return response;
+}
+
+/**
+ * 设置响应缓存头（保留原有函数以兼容现有代码）
  * @param response NextResponse对象
  * @param maxAge 缓存时间（秒）
  * @param staleWhileRevalidate 在重新验证时允许使用过期缓存的时间（秒）
@@ -340,6 +435,11 @@ export function withCache(
   maxAge: number = 60,
   staleWhileRevalidate: number = 300
 ): NextResponse {
+  // 开发环境不缓存
+  if (process.env.NODE_ENV === "development") {
+    return withNoCache(response);
+  }
+
   response.headers.set(
     "Cache-Control",
     `public, max-age=${maxAge}, s-maxage=${maxAge}, stale-while-revalidate=${staleWhileRevalidate}`

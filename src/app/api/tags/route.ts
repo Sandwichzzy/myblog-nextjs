@@ -5,7 +5,8 @@ import {
   createSuccessResponse,
   extractQueryParams,
   parseJsonBody,
-  withCache,
+  withSmartCache,
+  CacheStrategies,
   withNoCache,
   getClientIP,
   checkRateLimit,
@@ -103,8 +104,8 @@ async function handleGetTags(req: NextRequest) {
     return withNoCache(response);
   }
 
-  // 标签数据相对稳定，但考虑到管理操作，缓存时间缩短为2分钟
-  return withCache(response, 120, 300); // 2分钟缓存，5分钟stale-while-revalidate
+  // 标签数据相对稳定，使用半静态内容缓存策略
+  return withSmartCache(response, CacheStrategies.SEMI_STATIC);
 }
 
 /**

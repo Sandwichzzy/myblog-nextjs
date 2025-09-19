@@ -109,16 +109,16 @@ export async function generateTagStaticParams(): Promise<
 }
 
 // ISR 缓存控制
-export const ISR_CONFIG = {
-  // 首页缓存时间（10分钟）
-  HOME_REVALIDATE: 600,
-  // 文章详情页缓存时间（1小时）
-  ARTICLE_REVALIDATE: 3600,
-  // 文章列表页缓存时间（30分钟）
-  ARTICLES_LIST_REVALIDATE: 1800,
-  // 标签页缓存时间（20分钟）
-  TAG_PAGE_REVALIDATE: 1200,
-} as const;
+// export const ISR_CONFIG = {
+//   // 首页缓存时间（5分钟）
+//   HOME_REVALIDATE: 300, //600,
+//   // 文章详情页缓存时间（1分钟）
+//   ARTICLE_REVALIDATE: 60, //3600,
+//   // 文章列表页缓存时间（1分钟）
+//   ARTICLES_LIST_REVALIDATE: 60, //1800,
+//   // 标签页缓存时间（1分钟）
+//   TAG_PAGE_REVALIDATE: 60, //1200,
+// } as const;
 
 // 缓存标签
 export const CACHE_TAGS = {

@@ -6,7 +6,8 @@ import {
   createPaginatedResponse,
   extractQueryParams,
   parseJsonBody,
-  withCache,
+  withSmartCache,
+  CacheStrategies,
   getClientIP,
   checkRateLimit,
   ApiErrors,
@@ -100,15 +101,10 @@ async function handleGetArticles(req: NextRequest) {
     "文章列表获取成功"
   );
 
-  // 6. 设置缓存策略 - 个人博客项目优化版
+  // 6. 设置缓存策略 - 智能缓存优化版
   if (published !== false) {
-    // 开发环境不缓存，生产环境短时间缓存
-    if (process.env.NODE_ENV === "development") {
-      return response; // 开发时不缓存，方便调试
-    }
-
-    // 生产环境使用30秒缓存，平衡性能和实时性
-    return withCache(response, 30, 90); // 30秒缓存，90秒stale-while-revalidate
+    // 文章列表使用频繁变化缓存策略（开发环境不缓存，生产环境30秒缓存）
+    return withSmartCache(response, CacheStrategies.FREQUENT);
   }
 
   return response;

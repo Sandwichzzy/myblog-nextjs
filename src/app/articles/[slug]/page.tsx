@@ -18,7 +18,7 @@ import {
 import Image from "next/image";
 
 // 配置ISR - 文章详情页使用统一的配置
-export const revalidate = 3600;
+export const revalidate = 60;
 
 // 为最新的文章生成静态路径
 export async function generateStaticParams() {
