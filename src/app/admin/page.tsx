@@ -22,21 +22,27 @@ export default async function AdminDashboard() {
   const draftCount = totalArticles - publishedCount;
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* 页面标题 */}
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900">管理后台</h1>
-          <p className="mt-2 text-gray-600">欢迎回来，管理您的博客内容</p>
+        <div className="mb-12 text-center animate-fade-in-up">
+          <h1 className="text-4xl md:text-5xl font-bold mb-4">
+            <span className="gradient-text">管理控制台</span>
+          </h1>
+          <p className="text-gray-400 text-lg">
+            欢迎回来，
+            <span className="neon-text-purple"> 管理员 </span>-
+            掌控您的Web3内容生态
+          </p>
         </div>
 
         {/* 统计卡片 */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-          <div className="bg-white rounded-lg shadow-sm p-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
+          <div className="web3-card p-6 group hover:scale-105 transition-transform duration-300 animate-fade-in-up">
             <div className="flex items-center">
-              <div className="w-8 h-8 bg-blue-100 rounded-lg flex items-center justify-center">
+              <div className="w-12 h-12 bg-gradient-to-r from-blue-500 to-cyan-500 rounded-xl flex items-center justify-center group-hover:animate-pulse">
                 <svg
-                  className="w-5 h-5 text-blue-600"
+                  className="w-6 h-6 text-white"
                   fill="none"
                   stroke="currentColor"
                   viewBox="0 0 24 24"
@@ -45,24 +51,25 @@ export default async function AdminDashboard() {
                     strokeLinecap="round"
                     strokeLinejoin="round"
                     strokeWidth={2}
-                    d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+                    d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"
                   />
                 </svg>
               </div>
               <div className="ml-4">
-                <p className="text-sm font-medium text-gray-600">总文章</p>
-                <p className="text-2xl font-bold text-gray-900">
-                  {totalArticles}
-                </p>
+                <p className="text-sm font-medium text-gray-400">总文章</p>
+                <p className="text-3xl font-bold neon-text">{totalArticles}</p>
               </div>
             </div>
           </div>
 
-          <div className="bg-white rounded-lg shadow-sm p-6">
+          <div
+            className="web3-card p-6 group hover:scale-105 transition-transform duration-300 animate-fade-in-up"
+            style={{ animationDelay: "0.1s" }}
+          >
             <div className="flex items-center">
-              <div className="w-8 h-8 bg-green-100 rounded-lg flex items-center justify-center">
+              <div className="w-12 h-12 bg-gradient-to-r from-green-500 to-emerald-500 rounded-xl flex items-center justify-center group-hover:animate-pulse">
                 <svg
-                  className="w-5 h-5 text-green-600"
+                  className="w-6 h-6 text-white"
                   fill="none"
                   stroke="currentColor"
                   viewBox="0 0 24 24"
@@ -76,19 +83,22 @@ export default async function AdminDashboard() {
                 </svg>
               </div>
               <div className="ml-4">
-                <p className="text-sm font-medium text-gray-600">已发布</p>
-                <p className="text-2xl font-bold text-gray-900">
+                <p className="text-sm font-medium text-gray-400">已发布</p>
+                <p className="text-3xl font-bold text-green-400">
                   {publishedCount}
                 </p>
               </div>
             </div>
           </div>
 
-          <div className="bg-white rounded-lg shadow-sm p-6">
+          <div
+            className="web3-card p-6 group hover:scale-105 transition-transform duration-300 animate-fade-in-up"
+            style={{ animationDelay: "0.2s" }}
+          >
             <div className="flex items-center">
-              <div className="w-8 h-8 bg-yellow-100 rounded-lg flex items-center justify-center">
+              <div className="w-12 h-12 bg-gradient-to-r from-yellow-500 to-orange-500 rounded-xl flex items-center justify-center group-hover:animate-pulse">
                 <svg
-                  className="w-5 h-5 text-yellow-600"
+                  className="w-6 h-6 text-white"
                   fill="none"
                   stroke="currentColor"
                   viewBox="0 0 24 24"
@@ -102,17 +112,22 @@ export default async function AdminDashboard() {
                 </svg>
               </div>
               <div className="ml-4">
-                <p className="text-sm font-medium text-gray-600">草稿</p>
-                <p className="text-2xl font-bold text-gray-900">{draftCount}</p>
+                <p className="text-sm font-medium text-gray-400">草稿</p>
+                <p className="text-3xl font-bold text-yellow-400">
+                  {draftCount}
+                </p>
               </div>
             </div>
           </div>
 
-          <div className="bg-white rounded-lg shadow-sm p-6">
+          <div
+            className="web3-card p-6 group hover:scale-105 transition-transform duration-300 animate-fade-in-up"
+            style={{ animationDelay: "0.3s" }}
+          >
             <div className="flex items-center">
-              <div className="w-8 h-8 bg-purple-100 rounded-lg flex items-center justify-center">
+              <div className="w-12 h-12 bg-gradient-to-r from-purple-500 to-pink-500 rounded-xl flex items-center justify-center group-hover:animate-pulse">
                 <svg
-                  className="w-5 h-5 text-purple-600"
+                  className="w-6 h-6 text-white"
                   fill="none"
                   stroke="currentColor"
                   viewBox="0 0 24 24"
@@ -126,8 +141,8 @@ export default async function AdminDashboard() {
                 </svg>
               </div>
               <div className="ml-4">
-                <p className="text-sm font-medium text-gray-600">标签</p>
-                <p className="text-2xl font-bold text-gray-900">
+                <p className="text-sm font-medium text-gray-400">标签</p>
+                <p className="text-3xl font-bold neon-text-purple">
                   {tags.length}
                 </p>
               </div>
@@ -135,175 +150,37 @@ export default async function AdminDashboard() {
           </div>
         </div>
 
-        {/* 快速操作 */}
+        {/* 主要内容区域 */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           {/* 快速操作面板 */}
-          <div className="bg-white rounded-lg shadow-sm p-6">
-            <h2 className="text-lg font-medium text-gray-900 mb-4">快速操作</h2>
-            <div className="space-y-3">
+          <div
+            className="web3-card p-8 animate-fade-in-up"
+            style={{ animationDelay: "0.4s" }}
+          >
+            <h2 className="text-2xl font-bold text-white mb-6 flex items-center">
+              <svg
+                className="w-6 h-6 mr-3 neon-text-blue"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M13 10V3L4 14h7v7l9-11h-7z"
+                />
+              </svg>
+              <span className="gradient-text">快速操作</span>
+            </h2>
+            <div className="space-y-4">
               <Link
                 href="/admin/articles/new"
-                className="flex items-center w-full px-4 py-3 text-left bg-blue-50 hover:bg-blue-100 rounded-lg transition-colors"
+                className="flex items-center w-full px-6 py-4 text-left bg-gradient-to-r from-blue-500/10 to-purple-500/10 hover:from-blue-500/20 hover:to-purple-500/20 border border-blue-500/30 hover:border-blue-500/50 rounded-xl transition-all duration-300 group"
               >
-                <svg
-                  className="w-5 h-5 text-blue-600 mr-3"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M12 4v16m8-8H4"
-                  />
-                </svg>
-                <span className="text-blue-700 font-medium">创建新文章</span>
-              </Link>
-
-              <Link
-                href="/admin/articles"
-                className="flex items-center w-full px-4 py-3 text-left bg-gray-50 hover:bg-gray-100 rounded-lg transition-colors"
-              >
-                <svg
-                  className="w-5 h-5 text-gray-600 mr-3"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
-                  />
-                </svg>
-                <span className="text-gray-700 font-medium">管理文章</span>
-              </Link>
-
-              <Link
-                href="/admin/tags"
-                className="flex items-center w-full px-4 py-3 text-left bg-gray-50 hover:bg-gray-100 rounded-lg transition-colors"
-              >
-                <svg
-                  className="w-5 h-5 text-gray-600 mr-3"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"
-                  />
-                </svg>
-                <span className="text-gray-700 font-medium">管理标签</span>
-              </Link>
-
-              <Link
-                href="/admin/comments"
-                className="flex items-center w-full px-4 py-3 text-left bg-gray-50 hover:bg-gray-100 rounded-lg transition-colors"
-              >
-                <svg
-                  className="w-5 h-5 text-gray-600 mr-3"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"
-                  />
-                </svg>
-                <span className="text-gray-700 font-medium">
-                  管理评论 (API版本)
-                </span>
-              </Link>
-
-              <Link
-                href="/admin/comments-server"
-                className="flex items-center w-full px-4 py-3 text-left bg-green-50 hover:bg-green-100 rounded-lg transition-colors"
-              >
-                <svg
-                  className="w-5 h-5 text-green-600 mr-3"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M13 10V3L4 14h7v7l9-11h-7z"
-                  />
-                </svg>
-                <span className="text-green-700 font-medium">
-                  管理评论 (Server Actions) 🚀
-                </span>
-              </Link>
-            </div>
-          </div>
-
-          {/* 最新文章 */}
-          <div className="lg:col-span-2 bg-white rounded-lg shadow-sm p-6">
-            <div className="flex items-center justify-between mb-4">
-              <h2 className="text-lg font-medium text-gray-900">最新文章</h2>
-              <Link
-                href="/admin/articles"
-                className="text-sm text-blue-600 hover:text-blue-800"
-              >
-                查看全部
-              </Link>
-            </div>
-
-            <div className="space-y-4">
-              {recentArticles.length > 0 ? (
-                recentArticles.map(
-                  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                  (article: any) => (
-                    <div
-                      key={article.id}
-                      className="flex items-center justify-between p-4 border border-gray-200 rounded-lg"
-                    >
-                      <div className="flex-1">
-                        <h3 className="font-medium text-gray-900">
-                          {article.title}
-                        </h3>
-                        <p className="text-sm text-gray-500 mt-1">
-                          发布于{" "}
-                          {new Date(article.created_at).toLocaleDateString(
-                            "zh-CN"
-                          )}
-                          • {article.view_count} 次浏览
-                        </p>
-                      </div>
-                      <div className="flex items-center space-x-2">
-                        <span
-                          className={`px-2 py-1 text-xs rounded-full ${
-                            article.published
-                              ? "bg-green-100 text-green-800"
-                              : "bg-yellow-100 text-yellow-800"
-                          }`}
-                        >
-                          {article.published ? "已发布" : "草稿"}
-                        </span>
-                        <Link
-                          href={`/admin/articles/${article.slug}/edit`}
-                          className="text-blue-600 hover:text-blue-800 text-sm"
-                        >
-                          编辑
-                        </Link>
-                      </div>
-                    </div>
-                  )
-                )
-              ) : (
-                <div className="text-center py-8">
+                <div className="w-10 h-10 bg-gradient-to-r from-blue-500 to-purple-500 rounded-lg flex items-center justify-center mr-4 group-hover:scale-110 transition-transform">
                   <svg
-                    className="mx-auto h-12 w-12 text-gray-400"
+                    className="w-5 h-5 text-white"
                     fill="none"
                     stroke="currentColor"
                     viewBox="0 0 24 24"
@@ -312,14 +189,283 @@ export default async function AdminDashboard() {
                       strokeLinecap="round"
                       strokeLinejoin="round"
                       strokeWidth={2}
-                      d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+                      d="M12 4v16m8-8H4"
                     />
                   </svg>
-                  <p className="mt-2 text-sm text-gray-500">还没有文章</p>
+                </div>
+                <div>
+                  <span className="text-white font-semibold group-hover:neon-text transition-all">
+                    创建新文章
+                  </span>
+                  <p className="text-gray-400 text-sm mt-1">发布您的Web3见解</p>
+                </div>
+              </Link>
+
+              <Link
+                href="/admin/articles"
+                className="flex items-center w-full px-6 py-4 text-left bg-gradient-to-r from-purple-500/10 to-pink-500/10 hover:from-purple-500/20 hover:to-pink-500/20 border border-purple-500/30 hover:border-purple-500/50 rounded-xl transition-all duration-300 group"
+              >
+                <div className="w-10 h-10 bg-gradient-to-r from-purple-500 to-pink-500 rounded-lg flex items-center justify-center mr-4 group-hover:scale-110 transition-transform">
+                  <svg
+                    className="w-5 h-5 text-white"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"
+                    />
+                  </svg>
+                </div>
+                <div>
+                  <span className="text-white font-semibold group-hover:neon-text-purple transition-all">
+                    管理文章
+                  </span>
+                  <p className="text-gray-400 text-sm mt-1">编辑和管理内容</p>
+                </div>
+              </Link>
+
+              <Link
+                href="/admin/tags"
+                className="flex items-center w-full px-6 py-4 text-left bg-gradient-to-r from-green-500/10 to-blue-500/10 hover:from-green-500/20 hover:to-blue-500/20 border border-green-500/30 hover:border-green-500/50 rounded-xl transition-all duration-300 group"
+              >
+                <div className="w-10 h-10 bg-gradient-to-r from-green-500 to-blue-500 rounded-lg flex items-center justify-center mr-4 group-hover:scale-110 transition-transform">
+                  <svg
+                    className="w-5 h-5 text-white"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"
+                    />
+                  </svg>
+                </div>
+                <div>
+                  <span className="text-white font-semibold group-hover:text-green-400 transition-all">
+                    管理标签
+                  </span>
+                  <p className="text-gray-400 text-sm mt-1">分类和组织内容</p>
+                </div>
+              </Link>
+
+              <Link
+                href="/admin/comments"
+                className="flex items-center w-full px-6 py-4 text-left bg-gradient-to-r from-orange-500/10 to-red-500/10 hover:from-orange-500/20 hover:to-red-500/20 border border-orange-500/30 hover:border-orange-500/50 rounded-xl transition-all duration-300 group"
+              >
+                <div className="w-10 h-10 bg-gradient-to-r from-orange-500 to-red-500 rounded-lg flex items-center justify-center mr-4 group-hover:scale-110 transition-transform">
+                  <svg
+                    className="w-5 h-5 text-white"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"
+                    />
+                  </svg>
+                </div>
+                <div>
+                  <span className="text-white font-semibold group-hover:text-orange-400 transition-all">
+                    管理评论
+                  </span>
+                  <p className="text-gray-400 text-sm mt-1">
+                    API版本 - 传统架构
+                  </p>
+                </div>
+              </Link>
+
+              <Link
+                href="/admin/comments-server"
+                className="flex items-center w-full px-6 py-4 text-left bg-gradient-to-r from-cyan-500/10 to-blue-500/10 hover:from-cyan-500/20 hover:to-blue-500/20 border border-cyan-500/30 hover:border-cyan-500/50 rounded-xl transition-all duration-300 group relative overflow-hidden"
+              >
+                <div className="w-10 h-10 bg-gradient-to-r from-cyan-500 to-blue-500 rounded-lg flex items-center justify-center mr-4 group-hover:scale-110 transition-transform animate-glow">
+                  <svg
+                    className="w-5 h-5 text-white"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M13 10V3L4 14h7v7l9-11h-7z"
+                    />
+                  </svg>
+                </div>
+                <div>
+                  <span className="text-white font-semibold group-hover:neon-text transition-all flex items-center">
+                    管理评论
+                    <span className="ml-2 text-xs bg-gradient-to-r from-cyan-500 to-blue-500 text-white px-2 py-1 rounded-full animate-pulse">
+                      推荐
+                    </span>
+                  </span>
+                  <p className="text-gray-400 text-sm mt-1">
+                    Server Actions - 现代化架构 🚀
+                  </p>
+                </div>
+                <div className="absolute inset-0 bg-gradient-to-r from-cyan-500/5 to-blue-500/5 opacity-0 group-hover:opacity-100 transition-opacity"></div>
+              </Link>
+            </div>
+          </div>
+
+          {/* 最新文章 */}
+          <div
+            className="lg:col-span-2 web3-card p-8 animate-fade-in-up"
+            style={{ animationDelay: "0.5s" }}
+          >
+            <div className="flex items-center justify-between mb-6">
+              <h2 className="text-2xl font-bold text-white flex items-center">
+                <svg
+                  className="w-6 h-6 mr-3 neon-text-purple"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v4a2 2 0 01-2 2H9a2 2 0 01-2-2z"
+                  />
+                </svg>
+                <span className="gradient-text">最新文章</span>
+              </h2>
+              <Link
+                href="/admin/articles"
+                className="text-sm neon-text hover:animate-glow transition-all duration-300"
+              >
+                查看全部 →
+              </Link>
+            </div>
+
+            <div className="space-y-4">
+              {recentArticles.length > 0 ? (
+                recentArticles.map(
+                  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                  (article: any, index: number) => (
+                    <div
+                      key={article.id}
+                      className="flex items-center justify-between p-6 bg-gradient-to-r from-gray-800/50 to-gray-700/50 border border-gray-600/30 rounded-xl hover:border-blue-500/50 transition-all duration-300 group"
+                      style={{ animationDelay: `${0.1 * index}s` }}
+                    >
+                      <div className="flex-1">
+                        <h3 className="font-semibold text-white group-hover:neon-text transition-all mb-2">
+                          {article.title}
+                        </h3>
+                        <div className="flex items-center text-sm text-gray-400 space-x-4">
+                          <span className="flex items-center">
+                            <svg
+                              className="w-4 h-4 mr-1"
+                              fill="none"
+                              stroke="currentColor"
+                              viewBox="0 0 24 24"
+                            >
+                              <path
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                strokeWidth={2}
+                                d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
+                              />
+                            </svg>
+                            {new Date(article.created_at).toLocaleDateString(
+                              "zh-CN"
+                            )}
+                          </span>
+                          <span className="flex items-center">
+                            <svg
+                              className="w-4 h-4 mr-1"
+                              fill="none"
+                              stroke="currentColor"
+                              viewBox="0 0 24 24"
+                            >
+                              <path
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                strokeWidth={2}
+                                d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
+                              />
+                              <path
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                strokeWidth={2}
+                                d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"
+                              />
+                            </svg>
+                            {article.view_count} 次浏览
+                          </span>
+                        </div>
+                      </div>
+                      <div className="flex items-center space-x-3">
+                        <span
+                          className={`px-3 py-1 text-xs rounded-full font-medium ${
+                            article.published
+                              ? "bg-gradient-to-r from-green-500/20 to-emerald-500/20 text-green-400 border border-green-500/30"
+                              : "bg-gradient-to-r from-yellow-500/20 to-orange-500/20 text-yellow-400 border border-yellow-500/30"
+                          }`}
+                        >
+                          {article.published ? "已发布" : "草稿"}
+                        </span>
+                        <Link
+                          href={`/admin/articles/${article.slug}/edit`}
+                          className="text-blue-400 hover:neon-text hover:animate-glow text-sm font-medium transition-all duration-300"
+                        >
+                          编辑
+                        </Link>
+                      </div>
+                    </div>
+                  )
+                )
+              ) : (
+                <div className="text-center py-16">
+                  <div className="w-20 h-20 bg-gradient-to-r from-blue-500/20 to-purple-500/20 rounded-full flex items-center justify-center mx-auto mb-6 animate-pulse">
+                    <svg
+                      className="w-10 h-10 text-gray-400"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"
+                      />
+                    </svg>
+                  </div>
+                  <h3 className="text-xl font-semibold text-white mb-2">
+                    还没有文章
+                  </h3>
+                  <p className="text-gray-400 mb-6">
+                    开始创建您的第一篇Web3技术文章
+                  </p>
                   <Link
                     href="/admin/articles/new"
-                    className="mt-2 text-sm text-blue-600 hover:text-blue-800"
+                    className="web3-button inline-flex items-center"
                   >
+                    <svg
+                      className="w-4 h-4 mr-2"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M12 4v16m8-8H4"
+                      />
+                    </svg>
                     创建第一篇文章
                   </Link>
                 </div>
@@ -333,6 +479,6 @@ export default async function AdminDashboard() {
 }
 
 export const metadata = {
-  title: "管理后台 - 我的博客",
-  description: "博客管理后台首页",
+  title: "管理控制台 - Web3 博客",
+  description: "Web3博客管理后台控制台",
 };

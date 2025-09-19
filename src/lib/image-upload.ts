@@ -35,12 +35,12 @@ export async function uploadImage(
       };
     }
 
-    // 验证文件大小（最大 5MB）
-    const maxSize = 5 * 1024 * 1024;
+    // 验证文件大小（最大 1MB）
+    const maxSize = 1 * 1024 * 1024;
     if (file.size > maxSize) {
       return {
         success: false,
-        error: "图片文件大小不能超过 5MB",
+        error: "图片文件大小不能超过 1MB",
       };
     }
 
