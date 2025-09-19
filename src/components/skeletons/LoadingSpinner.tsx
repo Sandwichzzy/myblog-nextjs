@@ -18,10 +18,10 @@ export default function LoadingSpinner({
   };
 
   const colorClasses = {
-    blue: "bg-blue-100 border-blue-600",
-    purple: "bg-purple-100 border-purple-600",
-    green: "bg-green-100 border-green-600",
-    gray: "bg-gray-100 border-gray-600",
+    blue: "from-blue-500 to-cyan-500",
+    purple: "from-purple-500 to-pink-500",
+    green: "from-green-500 to-emerald-500",
+    gray: "from-gray-500 to-gray-600",
   };
 
   const spinnerSizeClasses = {
@@ -34,17 +34,22 @@ export default function LoadingSpinner({
     <div className="flex items-center justify-center min-h-[200px]">
       <div className="text-center">
         <div
-          className={`inline-flex items-center justify-center ${sizeClasses[size]} ${colorClasses[color]} rounded-full mb-4`}
+          className={`inline-flex items-center justify-center ${sizeClasses[size]} mb-4 relative`}
         >
+          {/* 主要旋转器 */}
           <div
-            className={`animate-spin rounded-full ${
-              spinnerSizeClasses[size]
-            } border-b-2 ${colorClasses[color].split(" ")[1]}`}
+            className={`animate-spin rounded-full ${spinnerSizeClasses[size]} bg-gradient-to-r ${colorClasses[color]} opacity-75`}
+          ></div>
+          {/* 外部光环效果 */}
+          <div
+            className={`absolute inset-0 animate-ping rounded-full ${spinnerSizeClasses[size]} bg-gradient-to-r ${colorClasses[color]} opacity-30`}
           ></div>
         </div>
-        <h2 className="text-lg font-semibold text-gray-900">{message}</h2>
+        <h2 className="text-lg font-semibold">
+          <span className="gradient-text">{message}</span>
+        </h2>
         {submessage && (
-          <p className="text-sm text-gray-600 mt-2">{submessage}</p>
+          <p className="text-sm text-gray-300 mt-2">{submessage}</p>
         )}
       </div>
     </div>
@@ -58,27 +63,30 @@ export function FullScreenLoading({
   color = "blue",
 }: Omit<LoadingSpinnerProps, "size">) {
   const colorClasses = {
-    blue: "bg-blue-100 border-blue-600",
-    purple: "bg-purple-100 border-purple-600",
-    green: "bg-green-100 border-green-600",
-    gray: "bg-gray-100 border-gray-600",
+    blue: "from-blue-500 to-cyan-500",
+    purple: "from-purple-500 to-pink-500",
+    green: "from-green-500 to-emerald-500",
+    gray: "from-gray-500 to-gray-600",
   };
 
   return (
-    <div className="fixed inset-0 bg-white bg-opacity-75 flex items-center justify-center z-50">
+    <div className="fixed inset-0 bg-gradient-to-br from-gray-900/95 via-blue-900/95 to-purple-900/95 backdrop-blur-sm flex items-center justify-center z-50">
       <div className="text-center">
-        <div
-          className={`inline-flex items-center justify-center w-16 h-16 ${colorClasses[color]} rounded-full mb-4`}
-        >
+        <div className="inline-flex items-center justify-center w-16 h-16 mb-4 relative">
+          {/* 主要旋转器 */}
           <div
-            className={`animate-spin rounded-full h-8 w-8 border-b-2 ${
-              colorClasses[color].split(" ")[1]
-            }`}
+            className={`animate-spin rounded-full h-8 w-8 bg-gradient-to-r ${colorClasses[color]} opacity-75`}
+          ></div>
+          {/* 外部光环效果 */}
+          <div
+            className={`absolute inset-0 animate-ping rounded-full h-8 w-8 bg-gradient-to-r ${colorClasses[color]} opacity-30`}
           ></div>
         </div>
-        <h2 className="text-lg font-semibold text-gray-900">{message}</h2>
+        <h2 className="text-lg font-semibold">
+          <span className="gradient-text">{message}</span>
+        </h2>
         {submessage && (
-          <p className="text-sm text-gray-600 mt-2">{submessage}</p>
+          <p className="text-sm text-gray-300 mt-2">{submessage}</p>
         )}
       </div>
     </div>
@@ -89,9 +97,9 @@ export function FullScreenLoading({
 export function SkeletonLoader() {
   return (
     <div className="animate-pulse">
-      <div className="h-4 bg-gray-200 rounded w-3/4 mb-2"></div>
-      <div className="h-4 bg-gray-200 rounded w-1/2 mb-2"></div>
-      <div className="h-4 bg-gray-200 rounded w-5/6"></div>
+      <div className="h-4 bg-gradient-to-r from-gray-600 to-gray-700 rounded w-3/4 mb-2"></div>
+      <div className="h-4 bg-gradient-to-r from-gray-600 to-gray-700 rounded w-1/2 mb-2"></div>
+      <div className="h-4 bg-gradient-to-r from-gray-600 to-gray-700 rounded w-5/6"></div>
     </div>
   );
 }
@@ -99,12 +107,12 @@ export function SkeletonLoader() {
 // 卡片骨架屏
 export function CardSkeleton() {
   return (
-    <div className="bg-white rounded-lg shadow-sm p-6 animate-pulse">
-      <div className="h-6 bg-gray-200 rounded w-3/4 mb-4"></div>
+    <div className="web3-card p-6 animate-pulse">
+      <div className="h-6 bg-gradient-to-r from-gray-600 to-gray-700 rounded w-3/4 mb-4"></div>
       <div className="space-y-2">
-        <div className="h-4 bg-gray-200 rounded w-full"></div>
-        <div className="h-4 bg-gray-200 rounded w-5/6"></div>
-        <div className="h-4 bg-gray-200 rounded w-4/5"></div>
+        <div className="h-4 bg-gradient-to-r from-gray-600 to-gray-700 rounded w-full"></div>
+        <div className="h-4 bg-gradient-to-r from-gray-600 to-gray-700 rounded w-5/6"></div>
+        <div className="h-4 bg-gradient-to-r from-gray-600 to-gray-700 rounded w-4/5"></div>
       </div>
     </div>
   );
@@ -116,7 +124,7 @@ export function TableRowSkeleton({ columns = 5 }: { columns?: number }) {
     <tr className="animate-pulse">
       {Array.from({ length: columns }).map((_, index) => (
         <td key={index} className="px-6 py-4">
-          <div className="h-4 bg-gray-200 rounded w-full"></div>
+          <div className="h-4 bg-gradient-to-r from-gray-600 to-gray-700 rounded w-full"></div>
         </td>
       ))}
     </tr>

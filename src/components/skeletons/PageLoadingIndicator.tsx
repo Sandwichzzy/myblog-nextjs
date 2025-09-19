@@ -8,20 +8,25 @@ export default function PageLoadingIndicator({
   color = "blue",
 }: PageLoadingIndicatorProps) {
   const colorClasses = {
-    blue: "border-blue-600",
-    purple: "border-purple-600",
-    green: "border-green-600",
-    gray: "border-gray-600",
+    blue: "from-blue-500 to-cyan-500",
+    purple: "from-purple-500 to-pink-500",
+    green: "from-green-500 to-emerald-500",
+    gray: "from-gray-500 to-gray-600",
   };
 
   return (
     <div className="fixed top-20 left-1/2 transform -translate-x-1/2 z-10">
-      <div className="bg-white rounded-lg shadow-lg p-4 border border-gray-200">
+      <div className="web3-card p-4 backdrop-blur-md">
         <div className="flex items-center space-x-3">
-          <div
-            className={`animate-spin rounded-full h-5 w-5 border-b-2 ${colorClasses[color]}`}
-          ></div>
-          <span className="text-sm text-gray-700">{message}</span>
+          <div className="relative">
+            <div
+              className={`animate-spin rounded-full h-5 w-5 bg-gradient-to-r ${colorClasses[color]} opacity-75`}
+            ></div>
+            <div
+              className={`absolute inset-0 animate-ping rounded-full h-5 w-5 bg-gradient-to-r ${colorClasses[color]} opacity-30`}
+            ></div>
+          </div>
+          <span className="text-sm text-gray-200 font-medium">{message}</span>
         </div>
       </div>
     </div>

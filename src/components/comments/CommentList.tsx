@@ -120,27 +120,27 @@ export default function CommentList({
           {comments.map((comment) => (
             <div
               key={comment.id}
-              className="bg-white border border-gray-200 rounded-lg p-4 hover:border-gray-300 transition-colors"
+              className="web3-card p-4 hover:scale-[1.02] transition-all duration-300"
             >
               <div className="flex items-start space-x-3">
                 {/* 头像 */}
-                <div className="w-10 h-10 bg-gradient-to-br from-blue-400 to-purple-500 rounded-full flex items-center justify-center text-white font-semibold text-sm">
+                <div className="w-10 h-10 bg-gradient-to-br from-blue-400 to-purple-500 rounded-full flex items-center justify-center text-white font-semibold text-sm shadow-lg">
                   {comment.author_name[0].toUpperCase()}
                 </div>
 
                 <div className="flex-1 min-w-0">
                   {/* 评论头部 */}
                   <div className="flex items-center space-x-2 mb-2">
-                    <h4 className="text-sm font-medium text-gray-900">
+                    <h4 className="text-sm font-medium text-gray-100">
                       {comment.author_name}
                     </h4>
-                    <span className="text-xs text-gray-500">
+                    <span className="text-xs text-gray-400">
                       {formatDate(comment.created_at)}
                     </span>
                   </div>
 
                   {/* 评论内容 */}
-                  <div className="text-sm text-gray-700 whitespace-pre-wrap break-words">
+                  <div className="text-sm text-gray-200 whitespace-pre-wrap break-words leading-relaxed">
                     {comment.content}
                   </div>
                 </div>
