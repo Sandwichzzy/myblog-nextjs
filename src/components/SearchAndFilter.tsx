@@ -45,21 +45,7 @@ export default function SearchAndFilter({
     <div className="web3-card p-8 mb-8 animate-fade-in-up">
       {/* 搜索框 */}
       <div className="relative mb-8">
-        <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-          <svg
-            className="h-5 w-5 text-gray-400 group-focus-within:text-blue-400 transition-colors"
-            fill="none"
-            stroke="currentColor"
-            viewBox="0 0 24 24"
-          >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth={2}
-              d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
-            />
-          </svg>
-        </div>
+        <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none"></div>
         <input
           type="text"
           placeholder="搜索Web3技术文章..."

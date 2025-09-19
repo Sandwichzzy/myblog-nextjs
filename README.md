@@ -198,7 +198,6 @@
 
   - [x] API Routes 版本 (`/admin/comments`)
   - [x] Server Actions 版本 (`/admin/comments-server`)
-  - [x] 性能对比界面
   - [x] 版本切换功能
 
 - [x] **开发规范统一**

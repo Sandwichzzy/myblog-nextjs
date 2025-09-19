@@ -218,7 +218,7 @@ export default function ArticleForm({
             id="title"
             value={formData.title}
             onChange={(e) => handleInputChange("title", e.target.value)}
-            className={`w-full px-4 py-2 border rounded-md focus:ring-2 focus:border-transparent ${
+            className={`w-full px-4 py-2 border rounded-md focus:ring-2 focus:border-transparent text-gray-900 bg-white ${
               fieldErrors.title
                 ? "border-red-300 focus:ring-red-500"
                 : "border-gray-300 focus:ring-blue-500"
@@ -243,7 +243,7 @@ export default function ArticleForm({
             id="slug"
             value={formData.slug}
             onChange={(e) => handleInputChange("slug", e.target.value)}
-            className={`w-full px-4 py-2 border rounded-md focus:ring-2 focus:border-transparent ${
+            className={`w-full px-4 py-2 border rounded-md focus:ring-2 focus:border-transparent text-gray-900 bg-white ${
               fieldErrors.slug
                 ? "border-red-300 focus:ring-red-500"
                 : "border-gray-300 focus:ring-blue-500"
@@ -272,7 +272,7 @@ export default function ArticleForm({
             value={formData.excerpt}
             onChange={(e) => handleInputChange("excerpt", e.target.value)}
             rows={3}
-            className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent text-gray-900 bg-white"
             placeholder="简短描述文章内容..."
           />
         </div>

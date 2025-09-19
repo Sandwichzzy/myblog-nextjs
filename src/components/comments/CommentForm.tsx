@@ -208,7 +208,7 @@ export default function CommentForm({
               onChange={handleInputChange}
               required
               disabled={isSubmitting}
-              className={`w-full px-3 py-2 border rounded-md shadow-sm focus:ring-2 focus:border-transparent disabled:bg-gray-50 disabled:text-gray-500 ${
+              className={`w-full px-3 py-2 border rounded-md shadow-sm focus:ring-2 focus:border-transparent disabled:bg-gray-50 disabled:text-gray-500 text-gray-900 bg-white ${
                 fieldErrors.authorName
                   ? "border-red-300 focus:ring-red-500"
                   : "border-gray-300 focus:ring-blue-500 focus:border-blue-500"
@@ -239,7 +239,7 @@ export default function CommentForm({
               value={formData.authorEmail}
               onChange={handleInputChange}
               disabled={isSubmitting}
-              className={`w-full px-3 py-2 border rounded-md shadow-sm focus:ring-2 focus:border-transparent disabled:bg-gray-50 disabled:text-gray-500 ${
+              className={`w-full px-3 py-2 border rounded-md shadow-sm focus:ring-2 focus:border-transparent disabled:bg-gray-50 disabled:text-gray-500 text-gray-900 bg-white ${
                 fieldErrors.authorEmail
                   ? "border-red-300 focus:ring-red-500"
                   : "border-gray-300 focus:ring-blue-500 focus:border-blue-500"
@@ -270,7 +270,7 @@ export default function CommentForm({
             required
             disabled={isSubmitting}
             rows={4}
-            className={`w-full px-3 py-2 border rounded-md shadow-sm focus:ring-2 focus:border-transparent disabled:bg-gray-50 disabled:text-gray-500 ${
+            className={`w-full px-3 py-2 border rounded-md shadow-sm focus:ring-2 focus:border-transparent disabled:bg-gray-50 disabled:text-gray-500 text-gray-900 bg-white ${
               fieldErrors.content
                 ? "border-red-300 focus:ring-red-500"
                 : "border-gray-300 focus:ring-blue-500 focus:border-blue-500"

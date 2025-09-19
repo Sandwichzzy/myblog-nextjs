@@ -208,7 +208,7 @@ export default function MarkdownEditor({
             value={value}
             onChange={(e) => onChange(e.target.value)}
             placeholder={placeholder}
-            className="w-full h-full p-4 border-none outline-none resize-none font-mono text-sm leading-relaxed"
+            className="w-full h-full p-4 border-none outline-none resize-none font-mono text-sm leading-relaxed text-gray-900 bg-white"
           />
         ) : (
           <div className="h-full overflow-y-auto p-4 bg-gray-50">

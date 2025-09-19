@@ -152,84 +152,99 @@ export function ArticlesPageClient() {
   };
 
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-      {/* 搜索和筛选 */}
-      <SearchAndFilter
-        onSearch={handleSearch}
-        onTagFilter={handleTagFilter}
-        selectedTag={selectedTag}
-        availableTags={tags}
-        onRefreshTags={handleRefreshTags}
-      />
+    <div className="min-h-screen bg-gradient-to-br from-gray-900 via-blue-900 to-purple-900">
+      {/* 背景装饰效果 */}
+      <div className="absolute inset-0 overflow-hidden pointer-events-none">
+        <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-blue-500/10 rounded-full blur-3xl animate-pulse"></div>
+        <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-purple-500/10 rounded-full blur-3xl animate-pulse delay-1000"></div>
+        <div className="absolute top-3/4 left-1/2 w-64 h-64 bg-pink-500/10 rounded-full blur-2xl animate-pulse delay-500"></div>
+      </div>
 
-      {/* 文章列表 */}
-      {loading ? (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
-          {Array.from({ length: 6 }).map((_, index) => (
-            <div
-              key={`skeleton-${index}`}
-              className="bg-white rounded-lg shadow-sm p-6"
-            >
-              <div className="h-4 bg-gray-200 rounded animate-pulse mb-4"></div>
-              <div className="h-3 bg-gray-200 rounded animate-pulse mb-2"></div>
-              <div className="h-3 bg-gray-200 rounded animate-pulse mb-4"></div>
-              <div className="flex gap-2 mb-4">
-                <div className="h-6 w-12 bg-gray-200 rounded animate-pulse"></div>
-                <div className="h-6 w-16 bg-gray-200 rounded animate-pulse"></div>
-              </div>
-              <div className="h-3 bg-gray-200 rounded animate-pulse"></div>
-            </div>
-          ))}
-        </div>
-      ) : articles.length > 0 ? (
-        <>
-          {/* 文章数量统计 */}
-          <div className="mb-6">
-            <p className="text-sm text-gray-600">
-              共找到 {totalCount} 篇文章
-              {selectedTag && (
-                <span className="ml-2 px-2 py-1 bg-blue-100 text-blue-800 text-xs rounded">
-                  {selectedTag}
-                </span>
-              )}
-            </p>
-          </div>
+      <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        {/* 搜索和筛选 */}
+        <SearchAndFilter
+          onSearch={handleSearch}
+          onTagFilter={handleTagFilter}
+          selectedTag={selectedTag}
+          availableTags={tags}
+          onRefreshTags={handleRefreshTags}
+        />
 
+        {/* 文章列表 */}
+        {loading ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
-            {articles.map((article) => (
-              <ArticleCard key={article.id} article={article} />
+            {Array.from({ length: 6 }).map((_, index) => (
+              <div
+                key={`skeleton-${index}`}
+                className="web3-card p-6 animate-pulse"
+              >
+                <div className="h-4 bg-gray-600 rounded mb-4"></div>
+                <div className="h-3 bg-gray-600 rounded mb-2"></div>
+                <div className="h-3 bg-gray-600 rounded mb-4"></div>
+                <div className="flex gap-2 mb-4">
+                  <div className="h-6 w-12 bg-gray-600 rounded"></div>
+                  <div className="h-6 w-16 bg-gray-600 rounded"></div>
+                </div>
+                <div className="h-3 bg-gray-600 rounded"></div>
+              </div>
             ))}
           </div>
+        ) : articles.length > 0 ? (
+          <>
+            {/* 文章数量统计 */}
+            <div className="mb-6">
+              <p className="text-sm text-gray-300">
+                共找到{" "}
+                <span className="neon-text font-semibold">{totalCount}</span>{" "}
+                篇文章
+                {selectedTag && (
+                  <span className="ml-2 px-3 py-1 bg-gradient-to-r from-blue-500 to-purple-500 text-white text-xs rounded-full shadow-lg">
+                    {selectedTag}
+                  </span>
+                )}
+              </p>
+            </div>
 
-          {/* 分页 */}
-          <Pagination
-            currentPage={currentPage}
-            totalPages={totalPages}
-            onPageChange={handlePageChange}
-          />
-        </>
-      ) : (
-        <div className="text-center py-12">
-          <div className="text-gray-400 text-6xl mb-4">📝</div>
-          <h3 className="text-xl font-semibold text-gray-900 mb-2">暂无文章</h3>
-          <p className="text-gray-600 mb-6">
-            {searchQuery || selectedTag
-              ? "没有找到符合条件的文章"
-              : "还没有发布任何文章"}
-          </p>
-          {(searchQuery || selectedTag) && (
-            <button
-              onClick={() => {
-                setSearchQuery("");
-                setSelectedTag("");
-              }}
-              className="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 transition-colors"
-            >
-              清除筛选条件
-            </button>
-          )}
-        </div>
-      )}
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
+              {articles.map((article) => (
+                <ArticleCard key={article.id} article={article} />
+              ))}
+            </div>
+
+            {/* 分页 */}
+            <Pagination
+              currentPage={currentPage}
+              totalPages={totalPages}
+              onPageChange={handlePageChange}
+            />
+          </>
+        ) : (
+          <div className="text-center py-12">
+            <div className="text-6xl mb-4 animate-bounce">
+              <span className="gradient-text">📝</span>
+            </div>
+            <h3 className="text-2xl font-semibold mb-2">
+              <span className="gradient-text">暂无文章</span>
+            </h3>
+            <p className="text-gray-300 mb-6 text-lg">
+              {searchQuery || selectedTag
+                ? "没有找到符合条件的文章"
+                : "还没有发布任何文章"}
+            </p>
+            {(searchQuery || selectedTag) && (
+              <button
+                onClick={() => {
+                  setSearchQuery("");
+                  setSelectedTag("");
+                }}
+                className="web3-button px-8 py-3 text-lg font-semibold uppercase tracking-wide"
+              >
+                清除筛选条件
+              </button>
+            )}
+          </div>
+        )}
+      </div>
     </div>
   );
 }

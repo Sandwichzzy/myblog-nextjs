@@ -318,6 +318,35 @@ body::before {
   color: var(--text-muted);
 }
 
+/* 管理后台专用输入框样式 */
+.admin-input {
+  background: white;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  color: #1f2937;
+  padding: 8px 12px;
+  transition: all 0.3s ease;
+}
+
+.admin-input:focus {
+  outline: none;
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+.admin-input::placeholder {
+  color: #6b7280;
+}
+
+.admin-input.error {
+  border-color: #ef4444;
+}
+
+.admin-input.error:focus {
+  border-color: #ef4444;
+  box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.1);
+}
+
 /* 霓虹文字效果 */
 .neon-text {
   color: var(--neon-blue);
