@@ -17,76 +17,88 @@ export default async function ArticlesManagePage({ searchParams }: PageProps) {
   const { articles, totalCount, totalPages, currentPage } = result;
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <div className="min-h-screen bg-gradient-to-br from-gray-900 via-blue-900 to-purple-900">
+      {/* 背景装饰效果 */}
+      <div className="absolute inset-0 overflow-hidden pointer-events-none">
+        <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-blue-500/10 rounded-full blur-3xl animate-pulse"></div>
+        <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-purple-500/10 rounded-full blur-3xl animate-pulse delay-1000"></div>
+        <div className="absolute top-3/4 left-1/2 w-64 h-64 bg-pink-500/10 rounded-full blur-2xl animate-pulse delay-500"></div>
+      </div>
+
+      <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* 页面标题和操作 */}
-        <div className="flex items-center justify-between mb-8">
+        <div className="flex items-center justify-between mb-8 animate-fade-in-up">
           <div>
-            <h1 className="text-3xl font-bold text-gray-900">文章管理</h1>
-            <p className="mt-2 text-gray-600">
-              管理所有文章，包括已发布和草稿状态
-            </p>
+            <h1 className="text-3xl font-bold mb-2">
+              <span className="gradient-text">文章管理</span>
+            </h1>
+            <p className="text-gray-300">管理所有文章，包括已发布和草稿状态</p>
           </div>
           <Link
             href="/admin/articles/new"
-            className="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+            className="web3-button px-6 py-3 font-semibold uppercase tracking-wide"
           >
             创建新文章
           </Link>
         </div>
 
         {/* 统计信息 */}
-        <div className="bg-white rounded-lg shadow-sm p-6 mb-6">
+        <div className="web3-card p-6 mb-6 animate-fade-in-up">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div className="text-center">
-              <p className="text-2xl font-bold text-gray-900">{totalCount}</p>
-              <p className="text-sm text-gray-600">总文章数</p>
+              <p className="text-2xl font-bold">
+                <span className="neon-text">{totalCount}</span>
+              </p>
+              <p className="text-sm text-gray-300">总文章数</p>
             </div>
             <div className="text-center">
-              <p className="text-2xl font-bold text-green-600">
+              <p className="text-2xl font-bold text-green-400">
                 {articles.filter((a) => a.published).length}
               </p>
-              <p className="text-sm text-gray-600">已发布</p>
+              <p className="text-sm text-gray-300">已发布</p>
             </div>
             <div className="text-center">
-              <p className="text-2xl font-bold text-yellow-600">
+              <p className="text-2xl font-bold text-yellow-400">
                 {articles.filter((a) => !a.published).length}
               </p>
-              <p className="text-sm text-gray-600">草稿</p>
+              <p className="text-sm text-gray-300">草稿</p>
             </div>
           </div>
         </div>
 
         {/* 文章列表 */}
-        <div className="bg-white rounded-lg shadow-sm overflow-hidden">
+        <div className="web3-card overflow-hidden animate-fade-in-up">
           {articles.length > 0 ? (
             <div className="overflow-x-auto">
-              <table className="min-w-full divide-y divide-gray-200">
-                <thead className="bg-gray-50">
+              <table className="min-w-full divide-y divide-gray-600">
+                <thead className="bg-gray-800/50">
                   <tr>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">
                       文章
                     </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">
                       状态
                     </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">
                       浏览量
                     </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">
                       创建时间
                     </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">
                       操作
                     </th>
                   </tr>
                 </thead>
-                <tbody className="bg-white divide-y divide-gray-200">
+                <tbody className="divide-y divide-gray-600">
                   {articles.map((article) => (
-                    <tr key={article.id} className="hover:bg-gray-50">
+                    <tr
+                      key={article.id}
+                      className="hover:bg-gray-700/20 transition-colors"
+                    >
                       <td className="px-6 py-4">
                         <div>
-                          <h3 className="text-sm font-medium text-gray-900">
+                          <h3 className="text-sm font-medium text-gray-100">
                             {article.title}
                           </h3>
                           <p className="text-sm text-gray-500 mt-1">

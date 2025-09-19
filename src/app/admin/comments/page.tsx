@@ -13,29 +13,36 @@ export default async function CommentsManagePage() {
   ]);
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <div className="min-h-screen bg-gradient-to-br from-gray-900 via-blue-900 to-purple-900">
+      {/* 背景装饰效果 */}
+      <div className="absolute inset-0 overflow-hidden pointer-events-none">
+        <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-blue-500/10 rounded-full blur-3xl animate-pulse"></div>
+        <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-purple-500/10 rounded-full blur-3xl animate-pulse delay-1000"></div>
+        <div className="absolute top-3/4 left-1/2 w-64 h-64 bg-pink-500/10 rounded-full blur-2xl animate-pulse delay-500"></div>
+      </div>
+
+      <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* 页面标题 */}
-        <div className="mb-8">
+        <div className="mb-8 animate-fade-in-up">
           <div className="flex items-center justify-between">
             <div>
-              <h1 className="text-3xl font-bold text-gray-900">
-                评论管理 (API版本)
+              <h1 className="text-3xl font-bold mb-2">
+                <span className="gradient-text">评论管理 (API版本)</span>
               </h1>
-              <p className="mt-2 text-gray-600">审核和管理用户评论</p>
+              <p className="text-gray-300">审核和管理用户评论</p>
             </div>
 
             {/* 版本切换 */}
             <div className="flex space-x-4">
               <a
                 href="/admin/comments"
-                className="px-4 py-2 text-sm bg-blue-600 text-white rounded-md"
+                className="web3-button px-4 py-2 text-sm font-medium"
               >
                 API版本 (当前)
               </a>
               <a
                 href="/admin/comments-server"
-                className="px-4 py-2 text-sm bg-gray-200 text-gray-700 rounded-md hover:bg-gray-300"
+                className="px-4 py-2 text-sm bg-gray-700/50 text-gray-300 rounded-md hover:bg-gray-600/50 transition-colors border border-gray-600"
               >
                 切换到Server Actions版本
               </a>
@@ -45,11 +52,11 @@ export default async function CommentsManagePage() {
 
         {/* 统计信息 */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-          <div className="bg-white rounded-lg shadow-sm p-6">
+          <div className="web3-card p-6 group hover:scale-105 transition-transform duration-300 animate-fade-in-up">
             <div className="flex items-center">
-              <div className="w-8 h-8 bg-blue-100 rounded-lg flex items-center justify-center">
+              <div className="w-8 h-8 bg-gradient-to-r from-blue-500 to-cyan-500 rounded-lg flex items-center justify-center group-hover:animate-pulse">
                 <svg
-                  className="w-5 h-5 text-blue-600"
+                  className="w-5 h-5 text-white"
                   fill="none"
                   stroke="currentColor"
                   viewBox="0 0 24 24"
@@ -63,19 +70,19 @@ export default async function CommentsManagePage() {
                 </svg>
               </div>
               <div className="ml-4">
-                <p className="text-sm font-medium text-gray-600">总评论</p>
-                <p className="text-2xl font-bold text-gray-900">
-                  {stats.totalComments}
+                <p className="text-sm font-medium text-gray-300">总评论</p>
+                <p className="text-2xl font-bold">
+                  <span className="neon-text">{stats.totalComments}</span>
                 </p>
               </div>
             </div>
           </div>
 
-          <div className="bg-white rounded-lg shadow-sm p-6">
+          <div className="web3-card p-6 group hover:scale-105 transition-transform duration-300 animate-fade-in-up">
             <div className="flex items-center">
-              <div className="w-8 h-8 bg-yellow-100 rounded-lg flex items-center justify-center">
+              <div className="w-8 h-8 bg-gradient-to-r from-yellow-500 to-orange-500 rounded-lg flex items-center justify-center group-hover:animate-pulse">
                 <svg
-                  className="w-5 h-5 text-yellow-600"
+                  className="w-5 h-5 text-white"
                   fill="none"
                   stroke="currentColor"
                   viewBox="0 0 24 24"
@@ -89,19 +96,21 @@ export default async function CommentsManagePage() {
                 </svg>
               </div>
               <div className="ml-4">
-                <p className="text-sm font-medium text-gray-600">待审核</p>
-                <p className="text-2xl font-bold text-gray-900">
-                  {stats.pendingComments}
+                <p className="text-sm font-medium text-gray-300">待审核</p>
+                <p className="text-2xl font-bold">
+                  <span className="text-yellow-400 font-bold">
+                    {stats.pendingComments}
+                  </span>
                 </p>
               </div>
             </div>
           </div>
 
-          <div className="bg-white rounded-lg shadow-sm p-6">
+          <div className="web3-card p-6 group hover:scale-105 transition-transform duration-300 animate-fade-in-up">
             <div className="flex items-center">
-              <div className="w-8 h-8 bg-green-100 rounded-lg flex items-center justify-center">
+              <div className="w-8 h-8 bg-gradient-to-r from-green-500 to-emerald-500 rounded-lg flex items-center justify-center group-hover:animate-pulse">
                 <svg
-                  className="w-5 h-5 text-green-600"
+                  className="w-5 h-5 text-white"
                   fill="none"
                   stroke="currentColor"
                   viewBox="0 0 24 24"
@@ -115,9 +124,11 @@ export default async function CommentsManagePage() {
                 </svg>
               </div>
               <div className="ml-4">
-                <p className="text-sm font-medium text-gray-600">已发布</p>
-                <p className="text-2xl font-bold text-gray-900">
-                  {stats.publishedComments}
+                <p className="text-sm font-medium text-gray-300">已发布</p>
+                <p className="text-2xl font-bold">
+                  <span className="text-green-400 font-bold">
+                    {stats.publishedComments}
+                  </span>
                 </p>
               </div>
             </div>

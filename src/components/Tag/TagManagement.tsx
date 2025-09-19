@@ -122,41 +122,58 @@ export default function TagManagement({ initialTags }: TagManagementProps) {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <div className="min-h-screen bg-gradient-to-br from-gray-900 via-blue-900 to-purple-900">
+      {/* 背景装饰效果 */}
+      <div className="absolute inset-0 overflow-hidden pointer-events-none">
+        <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-blue-500/10 rounded-full blur-3xl animate-pulse"></div>
+        <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-purple-500/10 rounded-full blur-3xl animate-pulse delay-1000"></div>
+        <div className="absolute top-3/4 left-1/2 w-64 h-64 bg-pink-500/10 rounded-full blur-2xl animate-pulse delay-500"></div>
+      </div>
+
+      <div className="relative z-10 max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* 页面标题 */}
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900">标签管理</h1>
-          <p className="mt-2 text-gray-600">管理博客标签，用于分类和组织文章</p>
+        <div className="mb-8 animate-fade-in-up">
+          <h1 className="text-3xl font-bold mb-2">
+            <span className="gradient-text">标签管理</span>
+          </h1>
+          <p className="text-gray-300">管理博客标签，用于分类和组织文章</p>
         </div>
 
         {/* 创建新标签表单 */}
         <TagForm onTagCreate={handleTagCreate} />
 
         {/* 标签统计 */}
-        <div className="bg-white rounded-lg shadow-sm p-6 mb-6">
+        <div className="web3-card p-6 mb-6 animate-fade-in-up">
           <div className="text-center">
-            <p className="text-2xl font-bold text-gray-900">{tags.length}</p>
-            <p className="text-sm text-gray-600">总标签数</p>
+            <p className="text-2xl font-bold">
+              <span className="neon-text">{tags.length}</span>
+            </p>
+            <p className="text-sm text-gray-300">总标签数</p>
           </div>
         </div>
 
         {/* 标签列表 */}
-        <div className="bg-white rounded-lg shadow-sm">
-          <div className="px-6 py-4 border-b border-gray-200">
+        <div className="web3-card animate-fade-in-up">
+          <div className="px-6 py-4 border-b border-gray-600">
             <div className="flex items-center justify-between">
-              <h2 className="text-lg font-medium text-gray-900">所有标签</h2>
+              <h2 className="text-lg font-medium">
+                <span className="gradient-text">所有标签</span>
+              </h2>
 
               {/* 批量操作区域 */}
               {selectedTags.length > 0 && (
                 <div className="flex items-center space-x-4">
-                  <span className="text-sm text-gray-600">
-                    已选择 {selectedTags.length} 个标签
+                  <span className="text-sm text-gray-300">
+                    已选择{" "}
+                    <span className="neon-text font-semibold">
+                      {selectedTags.length}
+                    </span>{" "}
+                    个标签
                   </span>
                   <button
                     onClick={handleBulkDelete}
                     disabled={isDeleting}
-                    className="px-3 py-1 text-sm bg-red-600 text-white rounded hover:bg-red-700 disabled:opacity-50 disabled:cursor-not-allowed"
+                    className="px-3 py-1 text-sm bg-gradient-to-r from-red-600 to-pink-600 text-white rounded hover:from-red-700 hover:to-pink-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
                   >
                     {isDeleting ? "删除中..." : "批量删除"}
                   </button>
@@ -167,14 +184,14 @@ export default function TagManagement({ initialTags }: TagManagementProps) {
             {/* 全选控制 */}
             {tags.length > 0 && (
               <div className="mt-3">
-                <label className="flex items-center">
+                <label className="flex items-center cursor-pointer">
                   <input
                     type="checkbox"
                     checked={selectedTags.length === tags.length}
                     onChange={handleSelectAll}
-                    className="h-4 w-4 text-blue-600 rounded border-gray-300"
+                    className="h-4 w-4 text-blue-500 rounded border-gray-500 bg-gray-700 focus:ring-blue-500 focus:ring-2"
                   />
-                  <span className="ml-2 text-sm text-gray-600">
+                  <span className="ml-2 text-sm text-gray-300">
                     {selectedTags.length === tags.length ? "取消全选" : "全选"}
                   </span>
                 </label>
