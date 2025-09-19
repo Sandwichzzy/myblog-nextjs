@@ -76,96 +76,51 @@ export async function signOut() {
  */
 export async function getCurrentUser(): Promise<AuthUser | null> {
   try {
-    // 添加超时保护（10秒）
-    const timeoutPromise = new Promise<null>((_, reject) => {
-      setTimeout(() => reject(new Error("获取用户信息超时")), 10000);
-    });
+    // 直接获取用户信息，不检查会话
+    const {
+      data: { user },
+      error,
+    } = await supabase.auth.getUser();
 
-    const userPromise = (async () => {
-      // 首先检查会话状态
-      const {
-        data: { session },
-        error: sessionError,
-      } = await supabase.auth.getSession();
+    if (error) {
+      console.error("获取用户信息失败:", error);
+      return null;
+    }
 
-      if (sessionError) {
-        console.error("获取会话失败:", sessionError);
-        return null;
-      }
+    if (!user) {
+      console.log("用户未登录");
+      return null;
+    }
 
-      if (!session) {
-        console.log("没有活跃的会话");
-        return null;
-      }
+    console.log("获取到用户信息:", user.email);
 
-      // 如果会话即将过期，尝试刷新（但不阻塞）
-      const now = Math.floor(Date.now() / 1000);
-      if (session.expires_at && session.expires_at - now < 300) {
-        // 5分钟内过期
-        console.log("会话即将过期，尝试刷新...");
-        try {
-          const {
-            data: { session: refreshedSession },
-            error: refreshError,
-          } = await supabase.auth.refreshSession();
+    // 获取用户配置信息
+    let profile = null;
+    try {
+      profile = await getUserProfile(user.id);
+    } catch (profileError) {
+      console.error("获取用户配置失败:", profileError);
 
-          if (refreshError) {
-            console.error("刷新会话失败:", refreshError);
-            // 刷新失败但不返回 null，继续使用当前会话
-          }
-
-          if (!refreshedSession) {
-            console.log("刷新后没有会话");
-            // 刷新失败但不返回 null，继续使用当前会话
-          }
-        } catch (refreshError) {
-          console.error("刷新会话异常:", refreshError);
-          // 继续使用当前会话
-        }
-      }
-
-      // 获取用户信息
-      const {
-        data: { user },
-        error,
-      } = await supabase.auth.getUser();
-
-      if (error || !user) {
-        console.error("获取用户信息失败:", error);
-        return null;
-      }
-
-      // 获取用户配置信息（移除超时限制，使用重试机制）
-      let profile = null;
+      // 如果获取失败，尝试创建用户配置
       try {
-        profile = await getUserProfile(user.id);
-      } catch (profileError) {
-        console.error("获取用户配置失败:", profileError);
-
-        // 如果获取失败，尝试创建用户配置
-        try {
-          console.log("尝试创建用户配置...");
-          profile = await ensureUserProfile({
-            id: user.id,
-            email: user.email,
-            user_metadata: user.user_metadata,
-          });
-          console.log("用户配置创建成功:", profile);
-        } catch (createError) {
-          console.error("创建用户配置失败:", createError);
-          // 配置获取/创建失败不阻塞用户登录
-        }
+        console.log("尝试创建用户配置...");
+        profile = await ensureUserProfile({
+          id: user.id,
+          email: user.email,
+          user_metadata: user.user_metadata,
+        });
+        console.log("用户配置创建成功:", profile);
+      } catch (createError) {
+        console.error("创建用户配置失败:", createError);
+        // 配置获取/创建失败不阻塞用户登录
       }
+    }
 
-      return {
-        id: user.id,
-        email: user.email,
-        profile: profile || undefined,
-      };
-    })();
-
-    // 使用 Promise.race 实现超时
-    return await Promise.race([userPromise, timeoutPromise]);
+    return {
+      id: user.id,
+      email: user.email,
+      profile: profile || undefined,
+    };
   } catch (error) {
     console.error("getCurrentUser 失败:", error);
     return null;
@@ -283,7 +238,7 @@ export async function ensureUserProfile(user: {
  */
 export async function isUserAdmin(userId?: string): Promise<boolean> {
   try {
-    // 如果没有提供userId，使用当前用户
+    // 如果没有提供userId，直接使用当前用户
     if (!userId) {
       const {
         data: { user },
@@ -297,12 +252,12 @@ export async function isUserAdmin(userId?: string): Promise<boolean> {
 
     console.log(`检查用户 ${userId} 的管理员权限`);
 
-    // 使用管理员客户端查询，绕过 RLS
+    // 查询用户配置
     const { data, error } = await supabase
       .from("user_profiles")
       .select("role, is_active, display_name")
       .eq("id", userId)
-      .maybeSingle(); // 移除 is_active 筛选，先查看原始数据
+      .maybeSingle();
 
     if (error) {
       console.error("检查管理员权限失败:", error);

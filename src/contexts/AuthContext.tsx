@@ -8,7 +8,7 @@ import {
   onAuthStateChange,
   isUserAdmin,
 } from "@/lib/auth";
-import { supabase } from "@/lib/supabase";
+
 import type { Provider } from "@supabase/supabase-js";
 
 // 创建认证Context
@@ -89,19 +89,62 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
   };
 
+  // 从localStorage检查登录状态
+  const checkAuthFromStorage = async () => {
+    try {
+      console.log("检查localStorage中的认证信息");
+
+      // 检查localStorage中是否有Supabase的认证信息
+      const keys = Object.keys(localStorage);
+      const supabaseKeys = keys.filter(
+        (key) =>
+          key.includes("supabase.auth.token") ||
+          (key.includes("sb-") && key.includes("auth-token"))
+      );
+
+      if (supabaseKeys.length === 0) {
+        console.log("localStorage中没有找到认证信息");
+        setUser(null);
+        setIsAdmin(false);
+        setIsLoading(false);
+        return;
+      }
+
+      console.log("localStorage中发现认证信息，尝试获取用户数据");
+
+      // 尝试获取当前用户
+      const currentUser = await getCurrentUser();
+
+      if (currentUser) {
+        console.log("成功从localStorage恢复用户:", currentUser.email);
+        setUser(currentUser);
+
+        // 检查管理员状态
+        try {
+          const adminStatus = await isUserAdmin(currentUser.id);
+          setIsAdmin(adminStatus);
+          console.log("管理员状态:", adminStatus);
+        } catch (error) {
+          console.error("检查管理员状态失败:", error);
+          setIsAdmin(false);
+        }
+      } else {
+        console.log("localStorage中的认证信息已过期或无效");
+        setUser(null);
+        setIsAdmin(false);
+      }
+    } catch (error) {
+      console.error("从localStorage检查认证状态失败:", error);
+      setUser(null);
+      setIsAdmin(false);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   // 初始化和监听认证状态变化
   useEffect(() => {
     let mounted = true;
-    let hasInitialized = false;
-
-    // 初始化完成函数
-    const completeInitialization = () => {
-      if (mounted && !hasInitialized) {
-        hasInitialized = true;
-        setIsLoading(false);
-        console.log("认证状态初始化完成");
-      }
-    };
 
     // 监听认证状态变化
     const {
@@ -131,118 +174,27 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         }
       }
 
-      // 完成初始化
-      completeInitialization();
-    });
-
-    // 等待 Supabase 会话恢复的初始化函数
-    const initializeAuth = async (retryCount = 0) => {
-      if (!mounted) return;
-
-      console.log(`开始初始化认证状态... (尝试 ${retryCount + 1}/3)`);
-
-      try {
-        // 首先检查是否有存储的会话
-        const {
-          data: { session },
-          error: sessionError,
-        } = await supabase.auth.getSession();
-
-        if (sessionError) {
-          console.error("获取会话失败:", sessionError);
-
-          // 如果是网络错误且重试次数未达到上限，进行重试
-          if (retryCount < 2 && sessionError.message.includes("network")) {
-            console.log("网络错误，1秒后重试...");
-            setTimeout(() => {
-              if (mounted) initializeAuth(retryCount + 1);
-            }, 1000);
-            return;
-          }
-        }
-
-        if (session) {
-          console.log("发现存储的会话，尝试恢复用户状态");
-          console.log("会话信息:", {
-            expires_at: session.expires_at,
-            user_id: session.user.id,
-            email: session.user.email,
-            role: session.user.role,
-          });
-
-          // 如果有会话，获取用户信息
-          const currentUser = await getCurrentUser();
-          if (mounted) {
-            setUser(currentUser);
-
-            if (currentUser) {
-              try {
-                const adminStatus = await isUserAdmin(currentUser.id);
-                if (mounted) {
-                  setIsAdmin(adminStatus);
-                  console.log("管理员状态:", adminStatus);
-                }
-              } catch (error) {
-                console.error("检查管理员状态失败:", error);
-                if (mounted) {
-                  setIsAdmin(false);
-                }
-              }
-            }
-          }
-        } else {
-          console.log("没有找到存储的会话");
-          if (mounted) {
-            setUser(null);
-            setIsAdmin(false);
-          }
-        }
-
-        // 手动初始化完成（如果监听器没有触发）
-        completeInitialization();
-      } catch (error) {
-        console.error("初始化认证状态失败:", error);
-
-        // 如果是网络错误且重试次数未达到上限，进行重试
-        if (
-          retryCount < 2 &&
-          error instanceof Error &&
-          error.message.includes("network")
-        ) {
-          console.log("网络错误，1秒后重试...");
-          setTimeout(() => {
-            if (mounted) initializeAuth(retryCount + 1);
-          }, 1000);
-          return;
-        }
-
-        if (mounted) {
-          setUser(null);
-          setIsAdmin(false);
-        }
-
-        // 即使出错也要完成初始化
-        completeInitialization();
-      }
-    };
-
-    // 立即初始化
-    initializeAuth();
-
-    // 如果 3 秒后还没有初始化，强制结束加载状态
-    const initTimeoutId = setTimeout(() => {
-      if (!hasInitialized && mounted) {
-        console.warn("认证状态初始化超时，强制结束加载状态");
-        console.warn("可能的原因：网络问题、Supabase配置问题或认证服务异常");
-        hasInitialized = true;
+      // 认证状态变化时，结束加载状态
+      if (mounted) {
         setIsLoading(false);
       }
-    }, 10000); // 减少到3秒
+    });
+
+    // 初始化：从localStorage检查认证状态
+    checkAuthFromStorage();
+
+    // 设置超时保护
+    const timeoutId = setTimeout(() => {
+      if (mounted) {
+        console.warn("认证状态初始化超时，强制结束加载状态");
+        setIsLoading(false);
+      }
+    }, 5000); // 5秒超时
 
     // 清理函数
     return () => {
       mounted = false;
-      clearTimeout(initTimeoutId);
+      clearTimeout(timeoutId);
       subscription?.unsubscribe();
     };
   }, []);

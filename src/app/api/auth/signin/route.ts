@@ -17,8 +17,10 @@ export async function POST(request: NextRequest) {
     // 使用 headers().get('origin') 自动获取当前域名
     const origin = request.headers.get("origin");
 
-    console.log("origin", origin);
+    console.log("OAuth登录请求:", { provider, origin });
+
     if (!origin) {
+      console.error("OAuth登录失败: 无法获取请求来源");
       return NextResponse.json(
         { success: false, error: "无法获取当前域名" },
         { status: 400 }
@@ -27,6 +29,8 @@ export async function POST(request: NextRequest) {
 
     // 构建回调 URL
     const redirectUrl = `${origin}/auth/callback`;
+
+    console.log("OAuth配置:", { provider, redirectUrl });
 
     // 调用 Supabase OAuth
     const { data, error } = await supabase.auth.signInWithOAuth({
@@ -37,12 +41,18 @@ export async function POST(request: NextRequest) {
     });
 
     if (error) {
-      console.error("OAuth 登录失败:", error);
+      console.error("OAuth 登录失败:", {
+        provider,
+        error: error.message,
+        redirectUrl,
+      });
       return NextResponse.json(
         { success: false, error: error.message },
         { status: 400 }
       );
     }
+
+    console.log("OAuth 登录成功:", { provider, hasAuthUrl: !!data.url });
 
     // 返回重定向 URL
     return NextResponse.json({
