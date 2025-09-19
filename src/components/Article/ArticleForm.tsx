@@ -20,6 +20,7 @@ interface ArticleFormData {
   excerpt: string;
   published: boolean;
   tagIds: string[];
+  git_repo_url: string; // 添加这一行
 }
 
 interface ArticleFormProps {
@@ -46,6 +47,7 @@ export default function ArticleForm({
     excerpt: article?.excerpt || "",
     published: article?.published || false,
     tagIds: article?.tags?.map((t: { tag: { id: string } }) => t.tag.id) || [],
+    git_repo_url: article?.git_repo_url || "", // 添加这一行
   });
 
   // 加载可用标签
@@ -275,6 +277,38 @@ export default function ArticleForm({
             className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent text-gray-900 bg-white"
             placeholder="简短描述文章内容..."
           />
+        </div>
+
+        {/* Git 仓库地址 */}
+        <div>
+          <label
+            htmlFor="git_repo_url"
+            className="block text-sm font-medium text-gray-700 mb-2"
+          >
+            Git 仓库地址
+            <span className="text-gray-500 text-xs ml-1">(可选)</span>
+          </label>
+          <input
+            type="url"
+            id="git_repo_url"
+            value={formData.git_repo_url}
+            onChange={(e) => handleInputChange("git_repo_url", e.target.value)}
+            className={`w-full px-4 py-2 border rounded-md focus:ring-2 focus:border-transparent text-gray-900 bg-white ${
+              fieldErrors.git_repo_url
+                ? "border-red-300 focus:ring-red-500"
+                : "border-gray-300 focus:ring-blue-500"
+            }`}
+            placeholder="https://github.com/username/repository"
+          />
+          {fieldErrors.git_repo_url ? (
+            <p className="mt-1 text-sm text-red-600">
+              {fieldErrors.git_repo_url}
+            </p>
+          ) : (
+            <p className="mt-1 text-sm text-gray-500">
+              项目的Git仓库地址，支持GitHub、GitLab等平台
+            </p>
+          )}
         </div>
 
         {/* 标签选择 */}

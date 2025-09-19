@@ -42,6 +42,14 @@ export const createArticleSchema = z.object({
 
   // 标签ID数组：可选，用于关联文章和标签
   tagIds: z.array(z.string().uuid("无效的标签ID格式")).optional().default([]),
+
+  // Git仓库地址：可选，必须是有效的URL格式
+  git_repo_url: z
+    .string()
+    .url("请输入有效的Git仓库地址")
+    .optional()
+    .nullable()
+    .or(z.literal("")),
 });
 
 // 文章更新验证规则（所有字段都是可选的）

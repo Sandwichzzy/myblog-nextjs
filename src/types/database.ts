@@ -13,6 +13,7 @@ export interface Database {
           updated_at: string;
           published: boolean;
           view_count: number;
+          git_repo_url: string | null;
         };
         Insert: {
           id?: string;
@@ -25,6 +26,7 @@ export interface Database {
           updated_at?: string;
           published?: boolean;
           view_count?: number;
+          git_repo_url?: string | null;
         };
         Update: {
           id?: string;
@@ -37,6 +39,7 @@ export interface Database {
           updated_at?: string;
           published?: boolean;
           view_count?: number;
+          git_repo_url?: string | null;
         };
       };
       tags: {
