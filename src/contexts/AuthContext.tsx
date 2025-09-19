@@ -89,71 +89,27 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
   };
 
-  // 从localStorage检查登录状态
-  const checkAuthFromStorage = async () => {
-    try {
-      console.log("检查localStorage中的认证信息");
-
-      // 检查localStorage中是否有Supabase的认证信息
-      const keys = Object.keys(localStorage);
-      const supabaseKeys = keys.filter(
-        (key) =>
-          key.includes("supabase.auth.token") ||
-          (key.includes("sb-") && key.includes("auth-token"))
-      );
-
-      if (supabaseKeys.length === 0) {
-        console.log("localStorage中没有找到认证信息");
-        setUser(null);
-        setIsAdmin(false);
-        setIsLoading(false);
-        return;
-      }
-
-      console.log("localStorage中发现认证信息，尝试获取用户数据");
-
-      // 尝试获取当前用户
-      const currentUser = await getCurrentUser();
-
-      if (currentUser) {
-        console.log("成功从localStorage恢复用户:", currentUser.email);
-        setUser(currentUser);
-
-        // 检查管理员状态
-        try {
-          const adminStatus = await isUserAdmin(currentUser.id);
-          setIsAdmin(adminStatus);
-          console.log("管理员状态:", adminStatus);
-        } catch (error) {
-          console.error("检查管理员状态失败:", error);
-          setIsAdmin(false);
-        }
-      } else {
-        console.log("localStorage中的认证信息已过期或无效");
-        setUser(null);
-        setIsAdmin(false);
-      }
-    } catch (error) {
-      console.error("从localStorage检查认证状态失败:", error);
-      setUser(null);
-      setIsAdmin(false);
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
   // 初始化和监听认证状态变化
   useEffect(() => {
     let mounted = true;
+    let hasInitialized = false;
 
-    // 监听认证状态变化
-    const {
-      data: { subscription },
-    } = onAuthStateChange(async (authUser) => {
-      if (!mounted) return;
+    // 完成初始化的函数
+    const completeInitialization = (authUser: AuthUser | null) => {
+      if (!mounted || hasInitialized) return;
 
-      console.log("认证状态变化:", authUser ? "已登录" : "未登录");
+      hasInitialized = true;
       setUser(authUser);
+      setIsLoading(false);
+      console.log(
+        "认证状态初始化完成:",
+        authUser ? `用户 ${authUser.email}` : "未登录"
+      );
+    };
+
+    // 处理用户状态更新
+    const updateUserState = async (authUser: AuthUser | null) => {
+      if (!mounted) return;
 
       if (authUser) {
         try {
@@ -173,23 +129,42 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           setIsAdmin(false);
         }
       }
+    };
 
-      // 认证状态变化时，结束加载状态
-      if (mounted) {
-        setIsLoading(false);
+    // 监听认证状态变化
+    const {
+      data: { subscription },
+    } = onAuthStateChange(async (authUser) => {
+      if (!mounted) return;
+
+      console.log(
+        "认证状态变化:",
+        authUser ? `已登录 (${authUser.email})` : "未登录"
+      );
+
+      // 如果还没有初始化，这是初始化过程
+      if (!hasInitialized) {
+        completeInitialization(authUser);
+        await updateUserState(authUser);
+      } else {
+        // 如果已经初始化，这是状态变化
+        setUser(authUser);
+        await updateUserState(authUser);
       }
     });
 
-    // 初始化：从localStorage检查认证状态
-    checkAuthFromStorage();
-
-    // 设置超时保护
+    // 设置超时保护 - 如果10秒内没有初始化完成，强制结束加载
     const timeoutId = setTimeout(() => {
-      if (mounted) {
+      if (!hasInitialized && mounted) {
         console.warn("认证状态初始化超时，强制结束加载状态");
+        console.warn("可能原因:");
+        console.warn("1. 网络连接问题");
+        console.warn("2. Supabase配置错误");
+        console.warn("3. localStorage中的token已过期");
+        hasInitialized = true;
         setIsLoading(false);
       }
-    }, 5000); // 5秒超时
+    }, 10000); // 10秒超时
 
     // 清理函数
     return () => {
