@@ -153,7 +153,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       }
     });
 
-    // 设置超时保护 - 如果10秒内没有初始化完成，强制结束加载
+    // 设置超时保护 - 如果30秒内没有初始化完成，强制结束加载
     const timeoutId = setTimeout(() => {
       if (!hasInitialized && mounted) {
         console.warn("认证状态初始化超时，强制结束加载状态");
@@ -164,7 +164,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         hasInitialized = true;
         setIsLoading(false);
       }
-    }, 10000); // 10秒超时
+    }, 30000); // 30秒超时
 
     // 清理函数
     return () => {
