@@ -147,13 +147,15 @@ export default function TagEditModal({
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-      <div className="bg-white rounded-lg p-6 w-full max-w-md mx-4">
+    <div className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center z-50">
+      <div className="web3-card p-6 w-full max-w-md mx-4">
         <div className="flex justify-between items-center mb-4">
-          <h3 className="text-lg font-semibold text-gray-900">编辑标签</h3>
+          <h3 className="text-lg font-semibold">
+            <span className="gradient-text">编辑标签</span>
+          </h3>
           <button
             onClick={onClose}
-            className="text-gray-400 hover:text-gray-600"
+            className="text-gray-400 hover:text-gray-200 transition-colors"
           >
             <svg
               className="w-6 h-6"
@@ -175,7 +177,7 @@ export default function TagEditModal({
           <div>
             <label
               htmlFor="tagName"
-              className="block text-sm font-medium text-gray-700 mb-2"
+              className="block text-sm font-medium text-gray-300 mb-2"
             >
               标签名称
             </label>
@@ -186,28 +188,28 @@ export default function TagEditModal({
                 value={formData.name}
                 onChange={(e) => handleNameChange(e.target.value)}
                 placeholder="输入标签名称"
-                className={`w-full px-4 py-2 border rounded-md focus:ring-2 focus:border-transparent text-gray-900 bg-white ${
+                className={`w-full px-4 py-2 border rounded-md focus:ring-2 focus:border-transparent text-gray-900 bg-white transition-all ${
                   nameError
-                    ? "border-red-300 focus:ring-red-500"
+                    ? "border-red-400 focus:ring-red-500"
                     : "border-gray-300 focus:ring-blue-500"
                 }`}
                 disabled={isSubmitting}
               />
               {isChecking && (
                 <div className="absolute right-3 top-1/2 transform -translate-y-1/2">
-                  <div className="animate-spin h-4 w-4 border-2 border-blue-600 border-t-transparent rounded-full"></div>
+                  <div className="animate-spin h-4 w-4 bg-gradient-to-r from-blue-400 to-purple-400 rounded-full"></div>
                 </div>
               )}
             </div>
             {nameError && (
-              <p className="mt-1 text-sm text-red-600">{nameError}</p>
+              <p className="mt-1 text-sm text-red-400">{nameError}</p>
             )}
           </div>
 
           <div>
             <label
               htmlFor="tagColor"
-              className="block text-sm font-medium text-gray-700 mb-2"
+              className="block text-sm font-medium text-gray-300 mb-2"
             >
               标签颜色
             </label>
@@ -218,7 +220,7 @@ export default function TagEditModal({
               onChange={(e) =>
                 setFormData((prev) => ({ ...prev, color: e.target.value }))
               }
-              className="w-full h-10 border border-gray-300 rounded-md"
+              className="w-full h-10 border border-gray-600 rounded-md bg-gray-800"
               disabled={isSubmitting}
             />
           </div>
@@ -227,7 +229,7 @@ export default function TagEditModal({
             <button
               type="button"
               onClick={onClose}
-              className="px-4 py-2 text-gray-700 border border-gray-300 rounded-md hover:bg-gray-50"
+              className="px-4 py-2 text-gray-300 border border-gray-600 rounded-md hover:bg-gray-700/50 transition-all"
               disabled={isSubmitting}
             >
               取消
@@ -235,7 +237,7 @@ export default function TagEditModal({
             <button
               type="submit"
               disabled={isSubmitting || isChecking || !!nameError}
-              className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
+              className="web3-button px-4 py-2 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
             >
               {isSubmitting
                 ? "更新中..."

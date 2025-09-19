@@ -77,14 +77,14 @@ export default function TagActions({
       <div className="flex items-center space-x-2">
         <button
           onClick={handleEdit}
-          className="text-blue-600 hover:text-blue-800 text-sm font-medium"
+          className="text-blue-400 hover:text-blue-300 text-sm font-medium transition-colors"
         >
           编辑
         </button>
         <button
           onClick={handleDelete}
           disabled={isDeleting}
-          className="text-red-600 hover:text-red-800 text-sm font-medium disabled:opacity-50 disabled:cursor-not-allowed"
+          className="text-red-400 hover:text-red-300 text-sm font-medium disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
         >
           {isDeleting ? "删除中..." : "删除"}
         </button>

@@ -135,13 +135,15 @@ export default function TagForm({ onTagCreate }: TagFormProps) {
   };
 
   return (
-    <div className="bg-white rounded-lg shadow-sm p-6 mb-6">
-      <h2 className="text-lg font-medium text-gray-900 mb-4">创建新标签</h2>
+    <div className="web3-card p-6 mb-6">
+      <h2 className="text-lg font-medium mb-4">
+        <span className="gradient-text">创建新标签</span>
+      </h2>
       <form onSubmit={handleSubmit} className="flex flex-wrap items-end gap-4">
         <div className="flex-1 min-w-48">
           <label
             htmlFor="tagName"
-            className="block text-sm font-medium text-gray-700 mb-2"
+            className="block text-sm font-medium text-gray-300 mb-2"
           >
             标签名称
           </label>
@@ -156,28 +158,28 @@ export default function TagForm({ onTagCreate }: TagFormProps) {
                 if (nameError) setNameError(null);
               }}
               placeholder="输入标签名称"
-              className={`w-full px-4 py-2 border rounded-md focus:ring-2 focus:border-transparent text-gray-900 bg-white ${
+              className={`w-full px-4 py-2 border rounded-md focus:ring-2 focus:border-transparent text-gray-900 bg-white transition-all ${
                 nameError
-                  ? "border-red-300 focus:ring-red-500"
+                  ? "border-red-400 focus:ring-red-500"
                   : "border-gray-300 focus:ring-blue-500"
               }`}
               disabled={isSubmitting}
             />
             {isChecking && (
               <div className="absolute right-3 top-1/2 transform -translate-y-1/2">
-                <div className="animate-spin h-4 w-4 border-2 border-blue-600 border-t-transparent rounded-full"></div>
+                <div className="animate-spin h-4 w-4 bg-gradient-to-r from-blue-400 to-purple-400 rounded-full"></div>
               </div>
             )}
           </div>
           {nameError && (
-            <p className="mt-1 text-sm text-red-600">{nameError}</p>
+            <p className="mt-1 text-sm text-red-400">{nameError}</p>
           )}
         </div>
 
         <div className="w-32">
           <label
             htmlFor="tagColor"
-            className="block text-sm font-medium text-gray-700 mb-2"
+            className="block text-sm font-medium text-gray-300 mb-2"
           >
             标签颜色
           </label>
@@ -188,7 +190,7 @@ export default function TagForm({ onTagCreate }: TagFormProps) {
             onChange={(e) =>
               setFormData((prev) => ({ ...prev, color: e.target.value }))
             }
-            className="w-full h-10 border border-gray-300 rounded-md"
+            className="w-full h-10 border border-gray-600 rounded-md bg-gray-800"
             disabled={isSubmitting}
           />
         </div>
@@ -196,7 +198,7 @@ export default function TagForm({ onTagCreate }: TagFormProps) {
         <button
           type="submit"
           disabled={isSubmitting || isChecking || !!nameError}
-          className="bg-blue-600 text-white px-6 py-2 rounded-md hover:bg-blue-700 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed"
+          className="web3-button px-6 py-2 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
         >
           {isSubmitting ? "创建中..." : isChecking ? "检查中..." : "创建标签"}
         </button>

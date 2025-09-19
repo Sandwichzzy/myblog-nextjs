@@ -228,7 +228,7 @@ export default function TagManagement({ initialTags }: TagManagementProps) {
                           className="w-4 h-4 rounded-full"
                           style={{ backgroundColor: tag.color }}
                         />
-                        <span className="font-medium text-gray-900">
+                        <span className="font-medium text-gray-300">
                           {tag.name}
                         </span>
                       </div>
