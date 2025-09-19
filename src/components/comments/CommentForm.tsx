@@ -158,17 +158,19 @@ export default function CommentForm({
   };
 
   return (
-    <div className="bg-white border border-gray-200 rounded-lg p-6">
-      <h3 className="text-lg font-semibold text-gray-900 mb-4">发表评论</h3>
+    <div className="web3-card p-6">
+      <h3 className="text-lg font-semibold mb-4">
+        <span className="gradient-text">发表评论</span>
+      </h3>
 
       {/* 未登录用户提示 */}
       {!user && (
-        <div className="mb-4 p-4 bg-blue-50 border border-blue-200 rounded-md">
-          <p className="text-sm text-blue-800">
+        <div className="mb-4 p-4 bg-blue-900/20 border border-blue-400/30 rounded-md backdrop-blur-sm">
+          <p className="text-sm text-blue-300">
             请先{" "}
             <a
               href="/auth/login"
-              className="font-medium text-blue-600 hover:text-blue-500 underline"
+              className="font-medium text-blue-400 hover:text-blue-300 underline transition-colors"
             >
               登录
             </a>{" "}
@@ -180,10 +182,10 @@ export default function CommentForm({
       {/* 消息提示 */}
       {message && (
         <div
-          className={`mb-4 p-3 rounded-md text-sm ${
+          className={`mb-4 p-3 rounded-md text-sm border backdrop-blur-sm ${
             message.type === "success"
-              ? "bg-green-50 text-green-800 border border-green-200"
-              : "bg-red-50 text-red-800 border border-red-200"
+              ? "bg-green-900/20 text-green-300 border-green-400/30"
+              : "bg-red-900/20 text-red-300 border-red-400/30"
           }`}
         >
           {message.text}
@@ -196,9 +198,9 @@ export default function CommentForm({
           <div>
             <label
               htmlFor="authorName"
-              className="block text-sm font-medium text-gray-700 mb-1"
+              className="block text-sm font-medium text-gray-300 mb-1"
             >
-              姓名 <span className="text-red-500">*</span>
+              姓名 <span className="text-red-400">*</span>
             </label>
             <input
               type="text"
@@ -208,15 +210,15 @@ export default function CommentForm({
               onChange={handleInputChange}
               required
               disabled={isSubmitting}
-              className={`w-full px-3 py-2 border rounded-md shadow-sm focus:ring-2 focus:border-transparent disabled:bg-gray-50 disabled:text-gray-500 text-gray-900 bg-white ${
+              className={`w-full px-3 py-2 border rounded-md shadow-sm focus:ring-2 focus:border-transparent disabled:bg-gray-800 disabled:text-gray-500 text-gray-900 bg-white transition-all ${
                 fieldErrors.authorName
-                  ? "border-red-300 focus:ring-red-500"
+                  ? "border-red-400 focus:ring-red-500"
                   : "border-gray-300 focus:ring-blue-500 focus:border-blue-500"
               }`}
               placeholder="您的姓名"
             />
             {fieldErrors.authorName && (
-              <p className="mt-1 text-sm text-red-600">
+              <p className="mt-1 text-sm text-red-400">
                 {fieldErrors.authorName}
               </p>
             )}
@@ -225,10 +227,10 @@ export default function CommentForm({
           <div>
             <label
               htmlFor="authorEmail"
-              className="block text-sm font-medium text-gray-700 mb-1"
+              className="block text-sm font-medium text-gray-300 mb-1"
             >
               邮箱{" "}
-              <span className="text-xs text-gray-500">
+              <span className="text-xs text-gray-400">
                 (可选，不会公开显示)
               </span>
             </label>
@@ -239,15 +241,15 @@ export default function CommentForm({
               value={formData.authorEmail}
               onChange={handleInputChange}
               disabled={isSubmitting}
-              className={`w-full px-3 py-2 border rounded-md shadow-sm focus:ring-2 focus:border-transparent disabled:bg-gray-50 disabled:text-gray-500 text-gray-900 bg-white ${
+              className={`w-full px-3 py-2 border rounded-md shadow-sm focus:ring-2 focus:border-transparent disabled:bg-gray-800 disabled:text-gray-500 text-gray-900 bg-white transition-all ${
                 fieldErrors.authorEmail
-                  ? "border-red-300 focus:ring-red-500"
+                  ? "border-red-400 focus:ring-red-500"
                   : "border-gray-300 focus:ring-blue-500 focus:border-blue-500"
               }`}
               placeholder="您的邮箱"
             />
             {fieldErrors.authorEmail && (
-              <p className="mt-1 text-sm text-red-600">
+              <p className="mt-1 text-sm text-red-400">
                 {fieldErrors.authorEmail}
               </p>
             )}
@@ -258,9 +260,9 @@ export default function CommentForm({
         <div>
           <label
             htmlFor="content"
-            className="block text-sm font-medium text-gray-700 mb-1"
+            className="block text-sm font-medium text-gray-300 mb-1"
           >
-            评论内容 <span className="text-red-500">*</span>
+            评论内容 <span className="text-red-400">*</span>
           </label>
           <textarea
             id="content"
@@ -270,17 +272,17 @@ export default function CommentForm({
             required
             disabled={isSubmitting}
             rows={4}
-            className={`w-full px-3 py-2 border rounded-md shadow-sm focus:ring-2 focus:border-transparent disabled:bg-gray-50 disabled:text-gray-500 text-gray-900 bg-white ${
+            className={`w-full px-3 py-2 border rounded-md shadow-sm focus:ring-2 focus:border-transparent disabled:bg-gray-800 disabled:text-gray-500 text-gray-900 bg-white transition-all ${
               fieldErrors.content
-                ? "border-red-300 focus:ring-red-500"
+                ? "border-red-400 focus:ring-red-500"
                 : "border-gray-300 focus:ring-blue-500 focus:border-blue-500"
             }`}
             placeholder="写下您的想法..."
           />
           {fieldErrors.content ? (
-            <p className="mt-1 text-sm text-red-600">{fieldErrors.content}</p>
+            <p className="mt-1 text-sm text-red-400">{fieldErrors.content}</p>
           ) : (
-            <p className="mt-1 text-xs text-gray-500">
+            <p className="mt-1 text-xs text-gray-400">
               请遵守相关法律法规，文明发言。评论将在审核后显示。
             </p>
           )}
@@ -297,13 +299,13 @@ export default function CommentForm({
               !formData.authorName.trim() ||
               Object.keys(fieldErrors).length > 0
             }
-            className="inline-flex items-center px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed"
+            className="web3-button px-6 py-2 text-sm font-medium disabled:opacity-50 disabled:cursor-not-allowed transition-all"
           >
             {!user ? (
               "请先登录"
             ) : isSubmitting ? (
               <>
-                <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                <div className="animate-spin rounded-full h-4 w-4 bg-gradient-to-r from-blue-400 to-purple-400 mr-2"></div>
                 提交中...
               </>
             ) : (

@@ -207,8 +207,9 @@ export default function CommentManagement({
       {/* 头部操作区 */}
       <div className="flex items-center justify-between">
         <div className="flex items-center space-x-4">
-          <h2 className="text-xl font-semibold text-gray-900">
-            评论管理 ({comments.length})
+          <h2 className="text-xl font-semibold">
+            <span className="gradient-text">评论管理</span>
+            <span className="neon-text ml-2">({comments.length})</span>
           </h2>
 
           {/* 筛选器 */}
@@ -217,7 +218,7 @@ export default function CommentManagement({
             onChange={(e) =>
               setFilter(e.target.value as "all" | "pending" | "published")
             }
-            className="text-sm border border-gray-300 rounded-md px-3 py-1"
+            className="text-sm border border-gray-600 bg-gray-800 text-gray-200 rounded-md px-3 py-1 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
           >
             <option value="all">全部评论</option>
             <option value="pending">待审核</option>
@@ -228,20 +229,24 @@ export default function CommentManagement({
         {/* 批量操作 */}
         {selectedComments.length > 0 && (
           <div className="flex items-center space-x-2">
-            <span className="text-sm text-gray-600">
-              已选择 {selectedComments.length} 条
+            <span className="text-sm text-gray-300">
+              已选择{" "}
+              <span className="neon-text font-semibold">
+                {selectedComments.length}
+              </span>{" "}
+              条
             </span>
             <button
               onClick={() => bulkAction("approve")}
               disabled={actionLoading === "bulk"}
-              className="px-3 py-1 text-sm bg-green-600 text-white rounded hover:bg-green-700 disabled:opacity-50"
+              className="px-3 py-1 text-sm bg-gradient-to-r from-green-600 to-emerald-600 text-white rounded hover:from-green-700 hover:to-emerald-700 disabled:opacity-50 transition-all"
             >
               批量通过
             </button>
             <button
               onClick={() => bulkAction("reject")}
               disabled={actionLoading === "bulk"}
-              className="px-3 py-1 text-sm bg-red-600 text-white rounded hover:bg-red-700 disabled:opacity-50"
+              className="px-3 py-1 text-sm bg-gradient-to-r from-red-600 to-pink-600 text-white rounded hover:from-red-700 hover:to-pink-700 disabled:opacity-50 transition-all"
             >
               批量删除
             </button>

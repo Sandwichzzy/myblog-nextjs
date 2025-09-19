@@ -10,22 +10,22 @@ export default function TableSkeleton({
   rows = 8,
 }: TableSkeletonProps) {
   return (
-    <div className="bg-white rounded-lg shadow-sm overflow-hidden">
+    <div className="web3-card overflow-hidden animate-fade-in-up">
       <div className="overflow-x-auto">
-        <table className="min-w-full divide-y divide-gray-200">
-          <thead className="bg-gray-50">
+        <table className="min-w-full divide-y divide-gray-600">
+          <thead className="bg-gray-800/50">
             <tr>
               {columns.map((column, index) => (
                 <th
                   key={index}
-                  className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                  className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider"
                 >
                   {column}
                 </th>
               ))}
             </tr>
           </thead>
-          <tbody className="bg-white divide-y divide-gray-200">
+          <tbody className="divide-y divide-gray-600">
             {Array.from({ length: rows }).map((_, i) => (
               <TableRowSkeleton key={i} columns={columns.length} />
             ))}
