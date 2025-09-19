@@ -17,8 +17,10 @@ import {
 } from "./ArticleInteractions";
 import Image from "next/image";
 
-// 配置ISR - 文章详情页使用统一的配置
-export const revalidate = 60;
+import { ISR_REVALIDATE } from "@/lib/isr-utils";
+
+// 配置ISR - 使用统一的ISR配置（开发环境10秒，生产环境1小时）
+export const revalidate = ISR_REVALIDATE.ARTICLE;
 
 // 为最新的文章生成静态路径
 export async function generateStaticParams() {

@@ -1,9 +1,9 @@
 import Link from "next/link";
 import { ArticleCard } from "@/components";
-import { getHomePageData } from "@/lib/isr-utils";
+import { getHomePageData, ISR_REVALIDATE } from "@/lib/isr-utils";
 
-// 配置ISR - 首页使用统一的配置
-export const revalidate = 600;
+// 配置ISR - 使用统一的ISR配置（开发环境10秒，生产环境10分钟）
+export const revalidate = ISR_REVALIDATE.HOME;
 
 // 为首页生成动态metadata
 export async function generateMetadata() {
