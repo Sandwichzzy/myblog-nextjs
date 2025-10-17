@@ -1,3 +1,4 @@
+import React from "react";
 import { notFound } from "next/navigation";
 import ReactMarkdown from "react-markdown";
 import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
@@ -16,6 +17,8 @@ import {
   FooterButtons,
 } from "./ArticleInteractions";
 import Image from "next/image";
+import { TableOfContents } from "@/components/Article/TableOfContents";
+import { HeadingIdCounter } from "@/lib/heading-utils";
 
 // ============================================================================
 // ISR 配置：文章详情页使用增量静态再生，优化加载性能
@@ -104,6 +107,9 @@ export default async function ArticleDetailPage({ params }: PageProps) {
   // 获取文章评论（服务端渲染）
   const commentsResult = await getArticleComments(article.id, 1, 10);
   const initialComments = commentsResult.comments;
+
+  // 创建标题 ID 计数器，确保重复标题有唯一 ID
+  const headingIdCounter = new HeadingIdCounter();
 
   // 站点URL（SEO元数据使用）
   const SITE_URL = "https://myblog-nextjs-jade.vercel.app";
@@ -244,33 +250,66 @@ export default async function ArticleDetailPage({ params }: PageProps) {
           )}
         </header>
 
-        {/* 文章内容 */}
-        <div className="web3-card overflow-hidden mb-8">
-          <div className="p-8 lg:p-12">
-            <div
-              className="prose prose-xl max-w-none 
-              prose-headings:text-gray-100 prose-headings:font-bold
-              prose-p:text-gray-200 prose-p:leading-relaxed prose-p:mb-4 
-              prose-a:text-blue-400 prose-a:no-underline hover:prose-a:text-blue-300 hover:prose-a:underline 
-              prose-strong:text-white prose-strong:font-semibold
-              prose-blockquote:text-gray-300 prose-blockquote:border-blue-400 prose-blockquote:bg-blue-900/20 prose-blockquote:rounded-r
-              prose-li:text-gray-200 prose-li:my-1
-              prose-code:text-pink-400 prose-code:bg-gray-800 prose-code:px-1 prose-code:py-0.5 prose-code:rounded
-              prose-pre:bg-gray-900 prose-pre:text-gray-100 prose-pre:border prose-pre:border-gray-700
-              prose-th:text-gray-100 prose-th:bg-gray-800 prose-th:border-gray-600
-              prose-td:text-gray-200 prose-td:border-gray-600
-              prose-hr:border-gray-600
-              prose-ul:text-gray-200 prose-ul:list-disc prose-ul:pl-6
-              prose-ol:text-gray-200 prose-ol:list-decimal prose-ol:pl-6
-              [&_li]:relative [&_li]:pl-0 [&_li::marker]:text-gray-400 [&_li::marker]:font-normal"
-              style={{
-                listStylePosition: "outside",
-              }}
-            >
-              <ReactMarkdown
-                remarkPlugins={[remarkGfm, remarkMath]}
-                rehypePlugins={[rehypeRaw, rehypeKatex]}
-                components={{
+        {/* 主内容区域：左侧目录 + 右侧文章内容 */}
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 mb-8">
+          {/* 左侧目录 - 仅在大屏幕显示 */}
+          <aside className="hidden lg:block lg:col-span-3">
+            <TableOfContents content={article.content} />
+          </aside>
+
+          {/* 右侧文章内容 */}
+          <div className="lg:col-span-9">
+            <div className="web3-card overflow-hidden">
+              <div className="p-8 lg:p-12">
+                <div
+                  className="prose prose-xl max-w-none
+                  prose-headings:text-gray-100 prose-headings:font-bold
+                  prose-p:text-gray-200 prose-p:leading-relaxed prose-p:mb-4
+                  prose-a:text-blue-400 prose-a:no-underline hover:prose-a:text-blue-300 hover:prose-a:underline
+                  prose-strong:text-white prose-strong:font-semibold
+                  prose-blockquote:text-gray-300 prose-blockquote:border-blue-400 prose-blockquote:bg-blue-900/20 prose-blockquote:rounded-r
+                  prose-li:text-gray-200 prose-li:my-1
+                  prose-code:text-pink-400 prose-code:bg-gray-800 prose-code:px-1 prose-code:py-0.5 prose-code:rounded
+                  prose-pre:bg-gray-900 prose-pre:text-gray-100 prose-pre:border prose-pre:border-gray-700
+                  prose-th:text-gray-100 prose-th:bg-gray-800 prose-th:border-gray-600
+                  prose-td:text-gray-200 prose-td:border-gray-600
+                  prose-hr:border-gray-600
+                  prose-ul:text-gray-200 prose-ul:list-disc prose-ul:pl-6
+                  prose-ol:text-gray-200 prose-ol:list-decimal prose-ol:pl-6
+                  [&_li]:relative [&_li]:pl-0 [&_li::marker]:text-gray-400 [&_li::marker]:font-normal"
+                  style={{
+                    listStylePosition: "outside",
+                  }}
+                >
+                  <ReactMarkdown
+                    remarkPlugins={[remarkGfm, remarkMath]}
+                    rehypePlugins={[rehypeRaw, rehypeKatex]}
+                    components={{
+                      // 自定义段落渲染 - 防止代码块被包裹在 p 标签中
+                      p: ({ children, ...props }) => {
+                        // 检查子元素是否包含 pre 标签（代码块）
+                        const hasCodeBlock = React.Children.toArray(children).some(
+                          (child) => {
+                            if (!React.isValidElement(child)) return false;
+                            // 检查是否是 pre 标签或包含语言类名的代码块
+                            return (
+                              child.type === "pre" ||
+                              (typeof child.props === "object" &&
+                                child.props !== null &&
+                                "className" in child.props &&
+                                typeof child.props.className === "string" &&
+                                child.props.className.includes("language-"))
+                            );
+                          }
+                        );
+
+                        // 如果包含代码块，使用 div 而不是 p
+                        if (hasCodeBlock) {
+                          return <div {...props}>{children}</div>;
+                        }
+
+                        return <p {...props}>{children}</p>;
+                      },
                   // 自定义图片渲染
                   img: ({ src, alt, ...props }) => {
                     // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -365,22 +404,73 @@ export default async function ArticleDetailPage({ params }: PageProps) {
                       </code>
                     );
                   },
-                  // 自定义标题渲染
-                  h1: ({ children }) => (
-                    <h1 className="text-3xl font-bold text-gray-100 mb-6 mt-8 border-b border-gray-600 pb-2">
-                      {children}
-                    </h1>
-                  ),
-                  h2: ({ children }) => (
-                    <h2 className="text-2xl font-bold text-gray-100 mb-4 mt-6">
-                      {children}
-                    </h2>
-                  ),
-                  h3: ({ children }) => (
-                    <h3 className="text-xl font-bold text-gray-100 mb-3 mt-4">
-                      {children}
-                    </h3>
-                  ),
+                  // 自定义标题渲染 - 添加 ID 以支持目录锚点
+                  h1: ({ children }) => {
+                    const id = headingIdCounter.getUniqueId(String(children));
+                    return (
+                      <h1
+                        id={id}
+                        className="text-3xl font-bold text-gray-100 mb-6 mt-8 border-b border-gray-600 pb-2 scroll-mt-24"
+                      >
+                        {children}
+                      </h1>
+                    );
+                  },
+                  h2: ({ children }) => {
+                    const id = headingIdCounter.getUniqueId(String(children));
+                    return (
+                      <h2
+                        id={id}
+                        className="text-2xl font-bold text-gray-100 mb-4 mt-6 scroll-mt-24"
+                      >
+                        {children}
+                      </h2>
+                    );
+                  },
+                  h3: ({ children }) => {
+                    const id = headingIdCounter.getUniqueId(String(children));
+                    return (
+                      <h3
+                        id={id}
+                        className="text-xl font-bold text-gray-100 mb-3 mt-4 scroll-mt-24"
+                      >
+                        {children}
+                      </h3>
+                    );
+                  },
+                  h4: ({ children }) => {
+                    const id = headingIdCounter.getUniqueId(String(children));
+                    return (
+                      <h4
+                        id={id}
+                        className="text-lg font-bold text-gray-100 mb-2 mt-3 scroll-mt-24"
+                      >
+                        {children}
+                      </h4>
+                    );
+                  },
+                  h5: ({ children }) => {
+                    const id = headingIdCounter.getUniqueId(String(children));
+                    return (
+                      <h5
+                        id={id}
+                        className="text-base font-bold text-gray-100 mb-2 mt-3 scroll-mt-24"
+                      >
+                        {children}
+                      </h5>
+                    );
+                  },
+                  h6: ({ children }) => {
+                    const id = headingIdCounter.getUniqueId(String(children));
+                    return (
+                      <h6
+                        id={id}
+                        className="text-sm font-bold text-gray-100 mb-2 mt-3 scroll-mt-24"
+                      >
+                        {children}
+                      </h6>
+                    );
+                  },
                   ul: ({ children }) => (
                     <ul className="list-disc list-inside text-gray-200 mb-4 space-y-1">
                       {children}
@@ -437,6 +527,8 @@ export default async function ArticleDetailPage({ params }: PageProps) {
             </div>
           </div>
         </div>
+      </div>
+    </div>
 
         {/* 文章底部信息 */}
         <footer className="border-t border-gray-600 pt-8 mb-12">

@@ -18,6 +18,7 @@ export { default as TagEditModal } from "./Tag/TagEditModal";
 export { default as TagManagement } from "./Tag/TagManagement";
 export { default as ImageUploader } from "./Article/ImageUploader";
 export { default as MarkdownEditor } from "./Article/MarkdownEditor";
+export { TableOfContents } from "./Article/TableOfContents";
 
 // 骨架屏组件
 export {
