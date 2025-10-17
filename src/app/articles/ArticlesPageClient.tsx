@@ -1,7 +1,7 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { useSearchParams } from "next/navigation";
+import { useState, useEffect, useRef } from "react";
+import { useSearchParams, useRouter } from "next/navigation";
 import { ArticleCard, SearchAndFilter, Pagination } from "@/components";
 import { ArticleForDisplay } from "@/types/database";
 
@@ -13,6 +13,7 @@ interface Tag {
 
 export function ArticlesPageClient() {
   const searchParams = useSearchParams();
+  const router = useRouter();
   const [articles, setArticles] = useState<ArticleForDisplay[]>([]);
   const [tags, setTags] = useState<Tag[]>([]);
   const [loading, setLoading] = useState(true);
@@ -22,38 +23,14 @@ export function ArticlesPageClient() {
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedTag, setSelectedTag] = useState("");
 
-  // 从URL参数获取初始筛选条件
-  useEffect(() => {
-    const tag = searchParams.get("tag");
-    const query = searchParams.get("search");
-    const page = searchParams.get("page");
-    const refresh = searchParams.get("refresh");
-
-    // 使用URL参数的值，而不是状态值
-    const currentTag = tag || "";
-    const currentQuery = query || "";
-    const currentPageNum = page ? parseInt(page) : 1;
-
-    if (tag) setSelectedTag(tag);
-    if (query) setSearchQuery(query);
-    if (page) setCurrentPage(currentPageNum);
-
-    // 如果有refresh参数，立即刷新数据（使用URL参数的值）
-    if (refresh) {
-      fetchArticles(currentPageNum, currentQuery, currentTag, true);
-      // 清除URL中的refresh参数
-      const url = new URL(window.location.href);
-      url.searchParams.delete("refresh");
-      window.history.replaceState({}, "", url.toString());
-    }
-  }, [searchParams]);
+  // 使用 ref 追踪上一次的查询参数，避免重复请求
+  const prevParamsRef = useRef<string>("");
 
   // 获取文章数据
   const fetchArticles = async (
     page: number = 1,
     search: string = "",
-    tag: string = "",
-    forceRefresh: boolean = false
+    tag: string = ""
   ) => {
     setLoading(true);
     try {
@@ -62,14 +39,9 @@ export function ArticlesPageClient() {
         limit: "12",
         ...(search && { search }),
         ...(tag && { tag }),
-        // 添加时间戳参数来绕过缓存
-        ...(forceRefresh && { _t: Date.now().toString() }),
       });
 
-      const response = await fetch(`/api/articles?${params}`, {
-        // 强制刷新时不使用缓存
-        cache: forceRefresh ? "no-cache" : "default",
-      });
+      const response = await fetch(`/api/articles?${params}`);
       const data = await response.json();
 
       if (data.success) {
@@ -85,17 +57,9 @@ export function ArticlesPageClient() {
   };
 
   // 获取标签数据
-  const fetchTags = async (forceRefresh: boolean = false) => {
+  const fetchTags = async () => {
     try {
-      const params = new URLSearchParams();
-      if (forceRefresh) {
-        params.set("nocache", "true");
-        params.set("_t", Date.now().toString());
-      }
-
-      const response = await fetch(`/api/tags?${params}`, {
-        cache: forceRefresh ? "no-cache" : "default",
-      });
+      const response = await fetch(`/api/tags`);
       const data = await response.json();
 
       if (data.success) {
@@ -106,49 +70,66 @@ export function ArticlesPageClient() {
     }
   };
 
-  // 初始化数据
+  // 初始化标签数据（只执行一次）
   useEffect(() => {
-    // 检查是否从管理页面返回或有refresh参数
-    const fromAdmin = document.referrer.includes("/admin");
-    const hasRefresh = searchParams.get("refresh") !== null;
-    const shouldForceRefresh = fromAdmin || hasRefresh;
+    fetchTags();
+  }, []);
 
-    fetchTags(shouldForceRefresh);
+  // 监听 URL 参数变化
+  useEffect(() => {
+    const tag = searchParams.get("tag") || "";
+    const query = searchParams.get("search") || "";
+    const page = parseInt(searchParams.get("page") || "1");
 
-    if (hasRefresh) {
-      // 清除URL中的refresh参数
-      const url = new URL(window.location.href);
-      url.searchParams.delete("refresh");
-      window.history.replaceState({}, "", url.toString());
+    // 创建当前参数的唯一标识
+    const currentParams = `${page}-${query}-${tag}`;
+
+    // 只有当参数真正变化时才执行
+    if (currentParams !== prevParamsRef.current) {
+      prevParamsRef.current = currentParams;
+
+      // 同步 UI 状态
+      setCurrentPage(page);
+      setSearchQuery(query);
+      setSelectedTag(tag);
+
+      // 获取数据
+      fetchArticles(page, query, tag);
     }
-  }, [searchParams]);
+  }, [searchParams]); // 只依赖 searchParams 对象
 
-  // 当筛选条件改变时重新获取数据
-  useEffect(() => {
-    fetchArticles(currentPage, searchQuery, selectedTag);
-  }, [currentPage, searchQuery, selectedTag]);
+  // 更新 URL 参数
+  const updateURL = (page: number, search: string, tag: string) => {
+    const params = new URLSearchParams();
+    if (page > 1) params.set("page", page.toString());
+    if (search) params.set("search", search);
+    if (tag) params.set("tag", tag);
+
+    const queryString = params.toString();
+    const newURL = queryString ? `/articles?${queryString}` : "/articles";
+
+    router.push(newURL, { scroll: false });
+  };
 
   // 处理搜索
   const handleSearch = (query: string) => {
-    setSearchQuery(query);
-    setCurrentPage(1);
+    updateURL(1, query, selectedTag);
   };
 
   // 处理标签筛选
   const handleTagFilter = (tag: string) => {
-    setSelectedTag(tag);
-    setCurrentPage(1);
+    updateURL(1, searchQuery, tag);
   };
 
   // 处理分页
   const handlePageChange = (page: number) => {
-    setCurrentPage(page);
+    updateURL(page, searchQuery, selectedTag);
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
   // 处理标签刷新
   const handleRefreshTags = () => {
-    fetchTags(true); // 强制刷新标签
+    fetchTags();
   };
 
   return (
@@ -234,8 +215,7 @@ export function ArticlesPageClient() {
             {(searchQuery || selectedTag) && (
               <button
                 onClick={() => {
-                  setSearchQuery("");
-                  setSelectedTag("");
+                  updateURL(1, "", "");
                 }}
                 className="web3-button px-8 py-3 text-lg font-semibold uppercase tracking-wide"
               >

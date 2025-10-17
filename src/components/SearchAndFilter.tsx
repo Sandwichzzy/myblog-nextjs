@@ -1,7 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { debounce } from "@/lib/utils";
+import { useState, useEffect, useCallback, useRef } from "react";
 
 interface SearchAndFilterProps {
   onSearch: (query: string) => void;
@@ -19,18 +18,32 @@ export default function SearchAndFilter({
   onRefreshTags,
 }: SearchAndFilterProps) {
   const [searchQuery, setSearchQuery] = useState("");
+  const searchTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
-  // 防抖搜索
-  const debouncedSearch = debounce((query: string) => {
-    onSearch(query);
-  }, 300);
+  // 使用 useCallback 稳定 debounce 函数
+  const debouncedSearch = useCallback((query: string) => {
+    if (searchTimeoutRef.current) {
+      clearTimeout(searchTimeoutRef.current);
+    }
 
+    searchTimeoutRef.current = setTimeout(() => {
+      onSearch(query);
+    }, 300);
+  }, [onSearch]);
+
+  // 清理定时器
   useEffect(() => {
-    debouncedSearch(searchQuery);
-  }, [searchQuery, debouncedSearch]);
+    return () => {
+      if (searchTimeoutRef.current) {
+        clearTimeout(searchTimeoutRef.current);
+      }
+    };
+  }, []);
 
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setSearchQuery(e.target.value);
+    const value = e.target.value;
+    setSearchQuery(value);
+    debouncedSearch(value);
   };
 
   const handleTagClick = (tagName: string) => {
