@@ -178,14 +178,11 @@ function extractHeadings(markdown: string): TocItem[] {
       .trim();
 
     // 生成基础 ID：将文本转为 URL 友好的格式
-    let baseId = generateHeadingId(text);
+    const baseId = generateHeadingId(text);
 
     // 处理重复的 ID：如果 ID 已存在，添加数字后缀
-    let id = baseId;
     const count = idCounts.get(baseId) || 0;
-    if (count > 0) {
-      id = `${baseId}-${count}`;
-    }
+    const id = count > 0 ? `${baseId}-${count}` : baseId;
     idCounts.set(baseId, count + 1);
 
     headings.push({
