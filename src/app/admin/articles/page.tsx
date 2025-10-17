@@ -80,9 +80,6 @@ export default async function ArticlesManagePage({ searchParams }: PageProps) {
                       状态
                     </th>
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">
-                      浏览量
-                    </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">
                       创建时间
                     </th>
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">
@@ -121,9 +118,6 @@ export default async function ArticlesManagePage({ searchParams }: PageProps) {
                         >
                           {article.published ? "已发布" : "草稿"}
                         </span>
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                        {article.view_count}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                         {formatDate(article.created_at)}

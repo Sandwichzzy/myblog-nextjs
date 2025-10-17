@@ -20,7 +20,6 @@ import {
   getArticleBySlugAdmin,
   updateArticle,
   deleteArticle,
-  incrementViewCount,
   addTagsToArticle,
   removeTagsFromArticle,
 } from "@/lib/articles";
@@ -40,9 +39,6 @@ import {
  * 路径参数：
  * - slug: 文章的URL标识符
  *
- * 查询参数：
- * - increment_view: 是否增加浏览量 (默认: true)
- *
  * 响应格式：
  * {
  *   "success": true,
@@ -53,7 +49,6 @@ import {
  *     "content": "文章内容",
  *     "excerpt": "文章摘要",
  *     "published": true,
- *     "view_count": 100,
  *     "created_at": "2024-01-01T00:00:00Z",
  *     "updated_at": "2024-01-01T00:00:00Z",
  *     "tags": [...]
@@ -61,7 +56,7 @@ import {
  * }
  */
 async function handleGetArticle(
-  req: NextRequest,
+  _req: NextRequest,
   { params }: { params: Promise<{ slug: string }> }
 ) {
   // 1. 验证路径参数
@@ -84,29 +79,10 @@ async function handleGetArticle(
     throw ApiErrors.notFound("文章不存在");
   }
 
-  // 4. 检查是否需要增加浏览量
-  const { searchParams } = new URL(req.url);
-  const incrementView = searchParams.get("increment_view") !== "false";
-
-  if (incrementView) {
-    // 使用异步方式增加浏览量，不阻塞响应
-    // 同时进行简单的防刷限制
-    const clientIP = getClientIP(req);
-    const viewKey = `view-${article.id}-${clientIP}`;
-
-    if (!checkRateLimit(viewKey, 3, 60000)) {
-      // 每分钟最多3次浏览计数
-      // 异步执行，不等待结果
-      incrementViewCount(article.id).catch((error) => {
-        console.error("增加浏览量失败:", error);
-      });
-    }
-  }
-
-  // 5. 创建响应并设置缓存
+  // 4. 创建响应并设置缓存
   const response = createSuccessResponse(article, "文章详情获取成功");
 
-  // 6. 设置缓存策略
+  // 5. 设置缓存策略
   // 已发布文章使用静态内容缓存策略，未发布文章不缓存
   if (article.published) {
     return withSmartCache(response, CacheStrategies.STATIC);
@@ -320,12 +296,6 @@ export const DELETE = withApiHandler(
  *           type: string
  *           pattern: ^[a-z0-9-]+$
  *         description: 文章URL标识符
- *       - in: query
- *         name: increment_view
- *         schema:
- *           type: boolean
- *           default: true
- *         description: 是否增加浏览量
  *     responses:
  *       200:
  *         description: 获取成功

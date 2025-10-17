@@ -6,7 +6,7 @@ import {
 } from "@/components";
 
 export default function ArticlesLoading() {
-  const columns = ["文章", "状态", "浏览量", "创建时间", "操作"];
+  const columns = ["文章", "状态", "创建时间", "操作"];
 
   return (
     <AdminPageSkeleton title={true} stats={3} actionButton={true}>

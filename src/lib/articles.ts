@@ -143,40 +143,6 @@ export async function getArticleBySlugAdmin(
   return data as ArticleWithTags;
 }
 
-// 增加文章浏览量
-export async function incrementViewCount(articleId: string) {
-  // 先获取当前浏览量
-  const { data: currentArticle, error: fetchError } = await supabase
-    .from("articles")
-    .select("view_count")
-    .eq("id", articleId)
-    .single();
-
-  if (fetchError) {
-    console.error("[incrementViewCount] 获取当前浏览量失败:", fetchError);
-    return;
-  }
-
-  const currentViewCount = currentArticle.view_count || 0;
-  const newViewCount = currentViewCount + 1;
-
-  // 增加浏览量
-  const { error } = await supabase
-    .from("articles")
-    .update({
-      view_count: newViewCount,
-    })
-    .eq("id", articleId);
-
-  if (error) {
-    console.error("[incrementViewCount] 更新浏览量失败:", error);
-  } else {
-    console.log(
-      `[incrementViewCount] 成功更新文章 ${articleId} 浏览量: ${currentViewCount} -> ${newViewCount}`
-    );
-  }
-}
-
 // 创建文章（管理员功能）
 export async function createArticle(
   articleData: ArticleInsert

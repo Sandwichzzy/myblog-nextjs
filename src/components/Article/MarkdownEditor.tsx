@@ -132,7 +132,7 @@ export default function MarkdownEditor({
               <button
                 key={index}
                 onClick={button.action}
-                className="px-2 py-1 text-sm rounded hover:bg-gray-200 transition-colors"
+                className="px-2 py-1 text-sm text-gray-900 font-semibold rounded hover:bg-gray-200 transition-colors"
                 title={button.label}
                 type="button"
               >
