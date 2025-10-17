@@ -33,22 +33,54 @@ NEXT_PUBLIC_SUPABASE_ANON_KEY=你的Anon密钥
 SUPABASE_SERVICE_ROLE_KEY=你的Service Role密钥
 ```
 
-### 4. 创建数据库表
+### 4. 初始化数据库
 
-1. 在 Supabase 仪表板点击 `SQL Editor`
-2. 点击 `New Query`
-3. 复制 `database/schema.sql` 的全部内容
-4. 粘贴到编辑器中
-5. 点击 `Run` 执行
+在 Supabase SQL 编辑器中按顺序执行以下脚本：
+
+#### 4.1 基础表结构
+```sql
+-- 复制 database/schema.sql 的内容并执行
+```
+
+#### 4.2 用户认证扩展
+```sql
+-- 复制 database/auth-extension.sql 的内容并执行
+```
+
+#### 4.3 修复 RLS 递归问题
+```sql
+-- 复制 database/fix-rls-recursion.sql 的内容并执行
+```
+
+#### 4.4 修复评论用户验证
+```sql
+-- 复制 database/fix-comment-user-auth.sql 的内容并执行
+```
+
+#### 4.5 RPC 函数
+```sql
+-- 复制 database/rpc-functions.sql 的内容并执行
+```
+
+#### 4.6 Git 仓库字段（可选）
+```sql
+-- 复制 database/add-git-repo-url.sql 的内容并执行
+```
+
+#### 4.7 图片存储配置
+```sql
+-- 复制 database/storage-setup.sql 的内容并执行
+```
 
 ### 5. 验证数据库创建
 
 1. 点击 `Table Editor`
 2. 检查是否有以下表：
-   - ✅ `articles` - 文章表
+   - ✅ `articles` - 文章表（包含 git_repo_url 字段）
    - ✅ `tags` - 标签表
    - ✅ `article_tags` - 关联表
-   - ✅ `comments` - 评论表
+   - ✅ `comments` - 评论表（包含 user_id 字段）
+   - ✅ `user_profiles` - 用户配置表
 
 ### 6. 查看示例数据
 
@@ -170,15 +202,29 @@ duplicate key value violates unique constraint
 如果需要重新开始，可以删除所有表：
 
 ```sql
+-- 删除表（注意顺序，先删除有外键依赖的表）
 DROP TABLE IF EXISTS article_tags CASCADE;
 DROP TABLE IF EXISTS comments CASCADE;
 DROP TABLE IF EXISTS articles CASCADE;
 DROP TABLE IF EXISTS tags CASCADE;
-DROP FUNCTION IF EXISTS update_updated_at_column();
-DROP FUNCTION IF EXISTS increment_view_count(UUID);
+DROP TABLE IF EXISTS user_profiles CASCADE;
+
+-- 删除函数
+DROP FUNCTION IF EXISTS update_updated_at_column() CASCADE;
+DROP FUNCTION IF EXISTS increment_view_count(UUID) CASCADE;
+DROP FUNCTION IF EXISTS create_user_profile() CASCADE;
+DROP FUNCTION IF EXISTS get_tags_with_count() CASCADE;
+
+-- 删除触发器（如果单独删除）
+DROP TRIGGER IF EXISTS update_articles_updated_at ON articles;
+DROP TRIGGER IF EXISTS on_auth_user_created ON auth.users;
+
+-- 删除存储桶策略
+DROP POLICY IF EXISTS "Public Access" ON storage.objects;
+DROP POLICY IF EXISTS "Authenticated users can upload images" ON storage.objects;
 ```
 
-然后重新执行 `schema.sql` 脚本。
+然后按照第4步的顺序重新执行所有SQL脚本。
 
 ## 📞 支持资源
 
