@@ -1,9 +1,14 @@
 import Link from "next/link";
 import { ArticleCard } from "@/components";
-import { getHomePageData, ISR_REVALIDATE } from "@/lib/isr-utils";
+import { getHomePageData } from "@/lib/isr-utils";
 
-// 配置ISR - 使用统一的ISR配置（开发环境10秒，生产环境10分钟）
-export const revalidate = ISR_REVALIDATE.HOME;
+// ============================================================================
+// ISR 配置：首页使用增量静态再生，自动定期更新最新文章
+// ============================================================================
+// 生产环境：600秒（10分钟）重新验证
+// 注意：Next.js 要求 revalidate 必须是静态字面量数字，不能使用变量或对象属性
+// 对应 ISR_REVALIDATE.HOME 的生产环境值
+export const revalidate = 600;
 
 // 为首页生成动态metadata
 export async function generateMetadata() {

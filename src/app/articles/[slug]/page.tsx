@@ -17,10 +17,13 @@ import {
 } from "./ArticleInteractions";
 import Image from "next/image";
 
-import { ISR_REVALIDATE } from "@/lib/isr-utils";
-
-// 配置ISR - 使用统一的ISR配置（开发环境10秒，生产环境1小时）
-export const revalidate = ISR_REVALIDATE.ARTICLE;
+// ============================================================================
+// ISR 配置：文章详情页使用增量静态再生，优化加载性能
+// ============================================================================
+// 生产环境：3600秒（1小时）重新验证
+// 注意：Next.js 要求 revalidate 必须是静态字面量数字，不能使用变量或对象属性
+// 对应 ISR_REVALIDATE.ARTICLE 的生产环境值
+export const revalidate = 3600;
 
 // 为最新的文章生成静态路径
 export async function generateStaticParams() {
